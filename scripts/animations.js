@@ -252,26 +252,35 @@ function initRecommendationConfetti() {
 // Create enhanced confetti elements with more variety and better animation
 function createEnhancedConfetti() {
     const container = document.getElementById('recommendation');
+    
+    // Brighter, more vibrant colors for better visibility
     const colors = [
-        'var(--color-primary)',
-        'var(--color-secondary)',
-        'var(--color-accent)',
-        'var(--color-success)',
-        'var(--color-warning)',
-        'var(--color-info)'
+        '#FF8200', // Brand orange
+        '#FFA300', // Bright yellow/orange
+        '#FF5A00', // Bright orange/red
+        '#31B700', // Bright green
+        '#00A3FF', // Bright blue
+        '#FF00FF', // Bright magenta
+        '#FFFF00', // Bright yellow
+        '#FFFFFF'  // White for contrast
     ];
     
-    // Create 80 confetti pieces for a richer effect
-    for (let i = 0; i < 80; i++) {
+    // Create more confetti pieces for a richer effect (increased from 120 to 150)
+    for (let i = 0; i < 150; i++) {
         const confetti = document.createElement('div');
         confetti.classList.add('confetti');
         
-        // Random position
+        // Random position across the full width
         const posX = Math.random() * 100;
         confetti.style.left = `${posX}%`;
         
-        // Random size
-        const size = Math.random() * 10 + 5; // 5-15px
+        // Distribute confetti throughout the section, not just at the bottom
+        // Start position is distributed throughout the section height
+        const startY = Math.random() * 100; // 0-100% of section height
+        confetti.style.top = `${startY}%`;
+        
+        // Larger random size (increased from 5-15px to 10-25px)
+        const size = Math.random() * 15 + 10; // 10-25px
         confetti.style.width = `${size}px`;
         confetti.style.height = `${size}px`;
         
@@ -279,8 +288,11 @@ function createEnhancedConfetti() {
         const colorIndex = Math.floor(Math.random() * colors.length);
         confetti.style.backgroundColor = colors[colorIndex];
         
+        // Add drop shadow for better visibility
+        confetti.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
+        
         // Random shape
-        const shapes = ['circle', 'square', 'triangle', 'rectangle', 'diamond'];
+        const shapes = ['circle', 'square', 'triangle', 'rectangle', 'diamond', 'star'];
         const shapeIndex = Math.floor(Math.random() * shapes.length);
         
         if (shapes[shapeIndex] === 'circle') {
@@ -294,53 +306,108 @@ function createEnhancedConfetti() {
             confetti.style.borderLeft = `${size/2}px solid transparent`;
             confetti.style.borderRight = `${size/2}px solid transparent`;
             confetti.style.borderBottom = `${size}px solid ${colors[colorIndex]}`;
+            // Add glow effect to triangle
+            confetti.style.filter = 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.7))';
         } else if (shapes[shapeIndex] === 'rectangle') {
             confetti.style.height = `${size/2}px`;
             confetti.style.borderRadius = '2px';
         } else if (shapes[shapeIndex] === 'diamond') {
             confetti.style.transform = 'rotate(45deg)';
+        } else if (shapes[shapeIndex] === 'star') {
+            // Create a star shape using clip-path
+            confetti.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+            confetti.style.backgroundColor = colors[colorIndex];
         }
         
-        // Random animation duration
-        const duration = Math.random() * 3 + 2; // 2-5s
+        // Higher opacity for better visibility (increased from default to 1.0)
+        confetti.style.opacity = '1.0';
+        
+        // Random animation duration - slightly longer for more visibility
+        const duration = Math.random() * 4 + 3; // 3-7s (increased from 2-5s)
         confetti.style.animationDuration = `${duration}s`;
         
-        // Random animation delay
-        const delay = Math.random() * 1;
+        // Random animation delay - staggered for better effect
+        const delay = Math.random() * 1.5;
         confetti.style.animationDelay = `${delay}s`;
         
-        // Random horizontal drift
-        const drift = Math.random() * 100 - 50; // -50px to 50px
+        // Random horizontal drift - increased for more movement
+        const drift = Math.random() * 150 - 75; // -75px to 75px (increased from -50px to 50px)
         confetti.style.animationName = 'none'; // Temporarily disable animation
         
         // Add to container
         container.appendChild(confetti);
         
-        // Create custom keyframes for this confetti piece
-        const keyframes = `
-            @keyframes confetti-fall-${i} {
-                0% {
-                    transform: translateY(-100px) translateX(0) rotate(0deg) scale(1);
-                    opacity: 1;
+        // Create custom keyframes for this confetti piece with improved animation
+        // Different animation based on starting position
+        const startingFromTop = startY < 30; // If starting in top 30% of section
+        
+        let keyframes;
+        if (startingFromTop) {
+            // For confetti starting at the top, use the original falling animation
+            keyframes = `
+                @keyframes confetti-fall-${i} {
+                    0% {
+                        transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
+                        opacity: 1;
+                    }
+                    10% {
+                        transform: translateY(50px) translateX(${drift * 0.3}px) rotate(${Math.random() * 180}deg) scale(${Math.random() * 0.2 + 0.9});
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: translateY(300px) translateX(${drift}px) rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.5 + 0.8});
+                        opacity: 0.9;
+                    }
+                    90% {
+                        opacity: 0.7;
+                    }
+                    100% {
+                        transform: translateY(700px) translateX(${drift * 2}px) rotate(${Math.random() * 720}deg) scale(0.5);
+                        opacity: 0;
+                    }
                 }
-                50% {
-                    transform: translateY(300px) translateX(${drift}px) rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.5 + 0.5});
-                    opacity: ${Math.random() * 0.5 + 0.5};
+            `;
+        } else {
+            // For confetti starting in the middle or bottom, use an explosion-like animation
+            const randomAngle = Math.random() * 360; // Random angle for explosion direction
+            const distance = 100 + Math.random() * 300; // Random distance to travel
+            const xMovement = distance * Math.cos(randomAngle * Math.PI / 180);
+            const yMovement = distance * Math.sin(randomAngle * Math.PI / 180);
+            
+            keyframes = `
+                @keyframes confetti-fall-${i} {
+                    0% {
+                        transform: translateX(0) translateY(0) rotate(0deg) scale(0.3);
+                        opacity: 0;
+                    }
+                    10% {
+                        transform: translateX(${xMovement * 0.1}px) translateY(${yMovement * 0.1}px) rotate(${Math.random() * 180}deg) scale(1);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: translateX(${xMovement * 0.5}px) translateY(${yMovement * 0.5}px) rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.3 + 0.8});
+                        opacity: 0.9;
+                    }
+                    100% {
+                        transform: translateX(${xMovement}px) translateY(${yMovement}px) rotate(${Math.random() * 720}deg) scale(0.2);
+                        opacity: 0;
+                    }
                 }
-                100% {
-                    transform: translateY(600px) translateX(${drift * 2}px) rotate(${Math.random() * 720}deg) scale(0.25);
-                    opacity: 0;
-                }
-            }
-        `;
+            `;
+        }
         
         // Add the keyframes to the document
         const styleElement = document.createElement('style');
         styleElement.textContent = keyframes;
         document.head.appendChild(styleElement);
         
-        // Apply the custom animation
-        confetti.style.animation = `confetti-fall-${i} ${duration}s forwards cubic-bezier(0.25, 1, 0.5, 1) ${delay}s`;
+        // Apply the custom animation with improved easing
+        confetti.style.animation = `confetti-fall-${i} ${duration}s forwards cubic-bezier(0.22, 0.68, 0.6, 1.0) ${delay}s`;
+        
+        // Add a subtle pulsing effect to some confetti pieces
+        if (i % 4 === 0) {
+            confetti.style.animation += `, pulse 1s infinite alternate ${delay}s`;
+        }
         
         // Remove after animation completes
         setTimeout(() => {
@@ -355,6 +422,134 @@ function createEnhancedConfetti() {
         audio.play().catch(e => console.log('Audio play prevented by browser policy'));
     } catch (e) {
         console.log('Audio play error:', e);
+    }
+    
+    // Add a flash effect to draw attention to the confetti
+    const flash = document.createElement('div');
+    flash.style.position = 'absolute';
+    flash.style.top = '0';
+    flash.style.left = '0';
+    flash.style.width = '100%';
+    flash.style.height = '100%';
+    flash.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+    flash.style.opacity = '0';
+    flash.style.zIndex = '0';
+    flash.style.pointerEvents = 'none';
+    flash.style.transition = 'opacity 0.3s ease';
+    container.appendChild(flash);
+    
+    // Trigger flash effect
+    setTimeout(() => {
+        flash.style.opacity = '1';
+        setTimeout(() => {
+            flash.style.opacity = '0';
+            setTimeout(() => {
+                flash.remove();
+            }, 300);
+        }, 100);
+    }, 0);
+    
+    // Create a second wave of confetti after a short delay for a more dramatic effect
+    setTimeout(() => {
+        createSecondWaveConfetti(container, colors);
+    }, 500);
+}
+
+// Create a second wave of confetti for a more dramatic effect
+function createSecondWaveConfetti(container, colors) {
+    // Create fewer pieces for the second wave
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        
+        // Random position across the full width
+        const posX = Math.random() * 100;
+        confetti.style.left = `${posX}%`;
+        
+        // Start from the middle of the section
+        confetti.style.top = `${30 + Math.random() * 40}%`; // 30-70% of section height
+        
+        // Larger random size
+        const size = Math.random() * 15 + 10; // 10-25px
+        confetti.style.width = `${size}px`;
+        confetti.style.height = `${size}px`;
+        
+        // Random color
+        const colorIndex = Math.floor(Math.random() * colors.length);
+        confetti.style.backgroundColor = colors[colorIndex];
+        
+        // Add drop shadow for better visibility
+        confetti.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
+        
+        // Random shape - use more stars and circles for the second wave
+        const shapes = ['circle', 'circle', 'star', 'star', 'diamond', 'square'];
+        const shapeIndex = Math.floor(Math.random() * shapes.length);
+        
+        if (shapes[shapeIndex] === 'circle') {
+            confetti.style.borderRadius = '50%';
+        } else if (shapes[shapeIndex] === 'square') {
+            confetti.style.borderRadius = '3px';
+        } else if (shapes[shapeIndex] === 'diamond') {
+            confetti.style.transform = 'rotate(45deg)';
+        } else if (shapes[shapeIndex] === 'star') {
+            // Create a star shape using clip-path
+            confetti.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+            confetti.style.backgroundColor = colors[colorIndex];
+        }
+        
+        // Higher opacity for better visibility
+        confetti.style.opacity = '1.0';
+        
+        // Random animation duration
+        const duration = Math.random() * 3 + 2; // 2-5s
+        
+        // Random animation delay
+        const delay = Math.random() * 0.5;
+        
+        // Add to container
+        container.appendChild(confetti);
+        
+        // Create explosion-like animation
+        const randomAngle = Math.random() * 360;
+        const distance = 100 + Math.random() * 200;
+        const xMovement = distance * Math.cos(randomAngle * Math.PI / 180);
+        const yMovement = distance * Math.sin(randomAngle * Math.PI / 180);
+        
+        const keyframes = `
+            @keyframes confetti-explode-${i} {
+                0% {
+                    transform: translateX(0) translateY(0) rotate(0deg) scale(0.3);
+                    opacity: 0;
+                }
+                10% {
+                    transform: translateX(${xMovement * 0.1}px) translateY(${yMovement * 0.1}px) rotate(${Math.random() * 180}deg) scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateX(${xMovement}px) translateY(${yMovement}px) rotate(${Math.random() * 720}deg) scale(0.2);
+                    opacity: 0;
+                }
+            }
+        `;
+        
+        // Add the keyframes to the document
+        const styleElement = document.createElement('style');
+        styleElement.textContent = keyframes;
+        document.head.appendChild(styleElement);
+        
+        // Apply the custom animation
+        confetti.style.animation = `confetti-explode-${i} ${duration}s forwards cubic-bezier(0.22, 0.68, 0.6, 1.0) ${delay}s`;
+        
+        // Add a pulsing effect to some confetti pieces
+        if (i % 3 === 0) {
+            confetti.style.animation += `, pulse 0.8s infinite alternate ${delay}s`;
+        }
+        
+        // Remove after animation completes
+        setTimeout(() => {
+            confetti.remove();
+            styleElement.remove();
+        }, (duration + delay) * 1000);
     }
 }
 

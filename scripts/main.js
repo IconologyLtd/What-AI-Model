@@ -332,16 +332,87 @@ async function showModelDetails(modelId) {
         modal.querySelector('.modal-content').prepend(particlesContainer);
     }
     
+    // Create modal banner container if it doesn't exist
+    let modalBanner = modal.querySelector('.modal-banner');
+    if (!modalBanner) {
+        modalBanner = document.createElement('div');
+        modalBanner.className = 'modal-banner';
+        modal.querySelector('.modal-content').prepend(modalBanner);
+    }
+    
     // Show modal
     modal.classList.remove('hidden');
     
     try {
-        // Get model details
-        const model = await openRouterAPI.getModelDetails(modelId);
+        // Get model details - first try to get from the DOM if available
+        let model;
         
-        console.log('Model details:', model);
-        console.log('Provider:', model.provider);
+        // Try to find the model in the DOM first (faster and more reliable)
+        const modelCard = document.querySelector(`.model-card[data-model-id="${modelId}"]`);
+        if (modelCard) {
+            // Extract basic info from the card
+            const name = modelCard.querySelector('h3').textContent;
+            const provider = modelCard.querySelector('.model-provider').textContent.trim();
+            const description = modelCard.querySelector('.model-description').textContent;
+            
+            // Get metrics from the card
+            const metricValues = Array.from(modelCard.querySelectorAll('.metric-value')).map(el => el.textContent);
+            
+            // Extract strengths directly from the DOM if available
+            let strengths = '';
+            const strengthsElement = modelCard.querySelector('.model-strengths');
+            if (strengthsElement) {
+                // Extract just the text after "Best for:" 
+                const strengthsText = strengthsElement.textContent;
+                const match = strengthsText.match(/Best for:\s*(.*)/);
+                if (match && match[1]) {
+                    strengths = match[1].trim();
+                }
+            }
+            
+            // Extract pricing directly from the DOM if available
+            let pricingText = '';
+            const pricingElement = modelCard.querySelector('.model-pricing');
+            if (pricingElement) {
+                // Extract just the text after "Pricing:" 
+                const rawPricingText = pricingElement.textContent;
+                const pricingMatch = rawPricingText.match(/Pricing:\s*(.*)/);
+                if (pricingMatch && pricingMatch[1]) {
+                    pricingText = pricingMatch[1].trim();
+                }
+            }
+            
+            // Create a model object from the DOM data
+            model = {
+                id: modelId,
+                name: name,
+                provider: provider.replace(/^[\s\uFEFF\xA0\u200B]+|[\s\uFEFF\xA0\u200B]+$/g, ''), // Remove any icon characters
+                description: description,
+                strengths: strengths, // Add the strengths directly
+                pricingText: pricingText, // Add the pricing text directly
+                metrics: {
+                    accuracy: metricValues[0] === 'N/A' ? null : parseFloat(metricValues[0]),
+                    performance: metricValues[1] === 'N/A' ? null : parseFloat(metricValues[1]),
+                    price: metricValues[2] === 'N/A' ? null : parseFloat(metricValues[2])
+                }
+            };
+            
+            // Try to extract capabilities from category tags
+            const categoryTags = modelCard.querySelectorAll('.category-tag');
+            if (categoryTags.length > 0) {
+                model.capabilities = Array.from(categoryTags).map(tag => tag.textContent);
+            }
+            
+            console.log('Model details from DOM:', model);
+        }
         
+        // If we couldn't get the model from the DOM, try the API
+        if (!model) {
+            model = await openRouterAPI.getModelDetails(modelId);
+            console.log('Model details from API:', model);
+        }
+        
+        // If we still don't have a model, show an error
         if (!model) {
             modalContent.innerHTML = '<div class="error">Model details not found.</div>';
             return;
@@ -355,6 +426,15 @@ async function showModelDetails(modelId) {
         // Get provider icon
         const providerIcon = getProviderIcon(model.provider);
         
+        // Update the modal banner with company name and model name
+        const modalBanner = modal.querySelector('.modal-banner');
+        if (modalBanner) {
+            modalBanner.innerHTML = `
+                <div class="banner-company">${providerIcon} ${model.provider || 'Unknown Provider'}</div>
+                <div class="banner-model">${model.name || 'Unknown Model'}</div>
+            `;
+        }
+        
         // Format capabilities as category tags
         const categoryTags = model.capabilities ? model.capabilities.map(capability => 
             `<span class="category-tag">${modelManager.categories[capability]?.name || capability}</span>`
@@ -364,10 +444,13 @@ async function showModelDetails(modelId) {
         const contextLength = model.context_length ? 
             `<div class="model-context-length"><i class="fas fa-exchange-alt"></i> <strong>Context Length:</strong> ${model.context_length.toLocaleString()} tokens</div>` : '';
         
-        // Format pricing details
+        // Format pricing details - use the pricing text from the DOM if available
         let pricingDetails = '<div class="model-pricing-details"><i class="fas fa-dollar-sign"></i> <strong>Pricing Details:</strong>';
         
-        if (model.pricing) {
+        if (model.pricingText) {
+            // Use the pricing text we extracted from the DOM
+            pricingDetails += `<div>${model.pricingText}</div>`;
+        } else if (model.pricing) {
             if (model.pricing.prompt && model.pricing.completion) {
                 const promptPrice = model.pricing.prompt * 1000;
                 const completionPrice = model.pricing.completion * 1000;
@@ -386,88 +469,59 @@ async function showModelDetails(modelId) {
         
         pricingDetails += '</div>';
         
-        // Format metrics
+        // Format metrics - ensure we have metrics even if they're empty
         let metricsHTML = '';
-        if (model.metrics) {
-            // Log metrics data for debugging
-            console.log(`Modal metrics for ${model.name}:`, model.metrics);
-            
-            const accuracy = model.metrics.accuracy || 0;
-            const performance = model.metrics.performance || 0;
-            const price = model.metrics.price || 0;
-            
-            metricsHTML = `
-                <div class="model-metrics-details">
-                    <h4><i class="fas fa-chart-line"></i> Performance Metrics</h4>
-                    <div class="metrics-grid">
-                        <div class="metric-detail">
-                            <div class="metric-name"><i class="fas fa-bullseye"></i> Accuracy</div>
-                            <div class="metric-bar">
-                                <div class="metric-fill" style="width: ${accuracy * 10}%"></div>
-                            </div>
-                            <div class="metric-value">${accuracy ? accuracy + '/10' : 'N/A'}</div>
+        const metrics = model.metrics || {};
+        
+        // Log metrics data for debugging
+        console.log(`Modal metrics for ${model.name}:`, metrics);
+        
+        // Get metric values with fallbacks
+        const accuracy = metrics.accuracy || 0;
+        const performance = metrics.performance || 0;
+        const price = metrics.price || 0;
+        
+        // Always create the metrics HTML
+        metricsHTML = `
+            <div class="model-metrics-details">
+                <h4><i class="fas fa-chart-line"></i> Performance Metrics</h4>
+                <div class="metrics-grid">
+                    <div class="metric-detail">
+                        <div class="metric-name"><i class="fas fa-bullseye"></i> Accuracy</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: ${accuracy * 10}%"></div>
                         </div>
-                        <div class="metric-detail">
-                            <div class="metric-name"><i class="fas fa-bolt"></i> Speed</div>
-                            <div class="metric-bar">
-                                <div class="metric-fill" style="width: ${performance * 10}%"></div>
-                            </div>
-                            <div class="metric-value">${performance ? performance + '/10' : 'N/A'}</div>
+                        <div class="metric-value">${accuracy ? accuracy + '/10' : 'N/A'}</div>
+                    </div>
+                    <div class="metric-detail">
+                        <div class="metric-name"><i class="fas fa-bolt"></i> Speed</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: ${performance * 10}%"></div>
                         </div>
-                        <div class="metric-detail">
-                            <div class="metric-name"><i class="fas fa-tag"></i> Value</div>
-                            <div class="metric-bar">
-                                <div class="metric-fill" style="width: ${price * 10}%"></div>
-                            </div>
-                            <div class="metric-value">${price ? price + '/10' : 'N/A'}</div>
+                        <div class="metric-value">${performance ? performance + '/10' : 'N/A'}</div>
+                    </div>
+                    <div class="metric-detail">
+                        <div class="metric-name"><i class="fas fa-tag"></i> Value</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: ${price * 10}%"></div>
                         </div>
+                        <div class="metric-value">${price ? price + '/10' : 'N/A'}</div>
                     </div>
                 </div>
-            `;
-        } else {
-            console.log(`No metrics data for ${model.name}`);
-            metricsHTML = `
-                <div class="model-metrics-details">
-                    <h4><i class="fas fa-chart-line"></i> Performance Metrics</h4>
-                    <div class="metrics-grid">
-                        <div class="metric-detail">
-                            <div class="metric-name"><i class="fas fa-bullseye"></i> Accuracy</div>
-                            <div class="metric-bar">
-                                <div class="metric-fill" style="width: 0%"></div>
-                            </div>
-                            <div class="metric-value">N/A</div>
-                        </div>
-                        <div class="metric-detail">
-                            <div class="metric-name"><i class="fas fa-bolt"></i> Speed</div>
-                            <div class="metric-bar">
-                                <div class="metric-fill" style="width: 0%"></div>
-                            </div>
-                            <div class="metric-value">N/A</div>
-                        </div>
-                        <div class="metric-detail">
-                            <div class="metric-name"><i class="fas fa-tag"></i> Value</div>
-                            <div class="metric-bar">
-                                <div class="metric-fill" style="width: 0%"></div>
-                            </div>
-                            <div class="metric-value">N/A</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
         
-        // Get model strengths
-        const strengths = modelManager.getModelStrengths(model);
+        // Use the strengths we extracted from the DOM if available, otherwise calculate them
+        const strengths = model.strengths || (model.name ? modelManager.getModelStrengths(model) : 'General AI assistance');
         
-        // Populate modal content
+        // Populate modal content - ensure we have valid values for all fields
         modalContent.innerHTML = `
             <div class="model-details">
-                <h2>${model.name}</h2>
-                <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
-                <div class="model-categories">${categoryTags}</div>
+                <h2>${model.name || 'Unknown Model'}</h2>
+                <div class="model-categories">${categoryTags || ''}</div>
                 <div class="model-description">${model.description || 'No description available.'}</div>
                 <div class="model-strengths"><i class="fas fa-check-circle"></i> <strong>Best for:</strong> ${strengths}</div>
-                ${contextLength}
+                ${contextLength || ''}
                 ${pricingDetails}
                 ${metricsHTML}
             </div>
@@ -487,13 +541,80 @@ async function showModelDetails(modelId) {
         
     } catch (error) {
         console.error('Error showing model details:', error);
+        
+        // Try to get basic model info from the ID for the banner
+        let modelName = 'Unknown Model';
+        let modelProvider = 'Unknown Provider';
+        
+        // Try to extract provider and model name from the ID
+        if (modelId) {
+            const parts = modelId.split('/');
+            if (parts.length > 1) {
+                modelProvider = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+                modelName = parts[1].split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            }
+        }
+        
+        // Update the banner even in case of error
+        const modalBanner = modal.querySelector('.modal-banner');
+        if (modalBanner) {
+            const providerIcon = getProviderIcon(modelProvider);
+            modalBanner.innerHTML = `
+                <div class="banner-company">${providerIcon} ${modelProvider}</div>
+                <div class="banner-model">${modelName}</div>
+            `;
+        }
+        
+        // Show a more user-friendly error message with a retry button
         modalContent.innerHTML = `
-            <div class="error">
-                Error loading model details.
-                <br>
-                ${error.message}
+            <div class="model-details">
+                <h2>Error Loading Details</h2>
+                <div class="error">
+                    <p>Sorry, we couldn't load the details for this model.</p>
+                    <p>Error: ${error.message || 'Unknown error'}</p>
+                    <button id="retry-details" class="submit-btn" style="margin-top: 20px;">
+                        <i class="fas fa-redo"></i> Retry
+                    </button>
+                </div>
+                
+                <div class="model-metrics-details">
+                    <h4><i class="fas fa-chart-line"></i> Performance Metrics</h4>
+                    <div class="metrics-grid">
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-bullseye"></i> Accuracy</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="metric-value">N/A</div>
+                        </div>
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-bolt"></i> Speed</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="metric-value">N/A</div>
+                        </div>
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-tag"></i> Value</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="metric-value">N/A</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
+        
+        // Add event listener for retry button
+        setTimeout(() => {
+            const retryButton = document.getElementById('retry-details');
+            if (retryButton) {
+                retryButton.addEventListener('click', () => {
+                    showModelDetails(modelId);
+                });
+            }
+        }, 100);
     }
 }
 
