@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Find the perfect AI model for your needs based on accuracy, performance, and price.">
+    <title>What AI Model - Recommendation App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>What AI Model</h1>
+        <p>Find the perfect AI model for your needs</p>
+    </header>
+
+    <main>
+        <section id="model-catalog">
+            <h2>AI Model Catalog</h2>
+            <div class="category-filters">
+                <h3>Filter by Category</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All Models</button>
+                    <button class="filter-btn" data-category="coding">Coding & Development</button>
+                    <button class="filter-btn" data-category="chat">General Chat</button>
+                    <button class="filter-btn" data-category="problem-solving">Problem Solving</button>
+                    <button class="filter-btn" data-category="it-support">IT Support</button>
+                    <button class="filter-btn" data-category="content">Content Creation</button>
+                    <button class="filter-btn" data-category="media">Media Generation</button>
+                </div>
+            </div>
+            <div id="models-container" class="models-grid">
+                <div class="loading">Loading models data...</div>
+            </div>
+        </section>
+
+        <section id="recommendation">
+            <h2>Get a Recommendation</h2>
+            <p>Describe what you need, and we'll recommend the best AI models for you.</p>
+            <form id="recommendation-form">
+                <div class="form-group">
+                    <label for="user-needs">What do you need the AI model for?</label>
+                    <textarea id="user-needs" rows="4" placeholder="E.g., I need to write blog posts about technology, generate images for my website, and help with coding in Python."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>What factors are most important to you?</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="factors" value="accuracy" checked> Accuracy</label>
+                        <label><input type="checkbox" name="factors" value="performance" checked> Performance</label>
+                        <label><input type="checkbox" name="factors" value="price" checked> Price</label>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Get Recommendations</button>
+            </form>
+            <div id="recommendations-result" class="hidden">
+                <h3>Recommended Models</h3>
+                <div id="recommended-models" class="models-grid"></div>
+                <button id="reset-recommendation" class="reset-btn">Start Over</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Data provided by OpenRouter API</p>
+    </footer>
+
+    <div id="model-details-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="model-details-content"></div>
+        </div>
+    </div>
+
+    <script src="scripts/api.js"></script>
+    <script src="scripts/models.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
