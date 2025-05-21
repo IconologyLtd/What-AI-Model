@@ -71,7 +71,37 @@ class ModelManager {
                 // Assign some default capabilities based on model name/description
                 model.capabilities = this.inferCapabilities(model);
             }
+            
+            // Ensure all models have a provider
+            if (!model.provider) {
+                // Try to infer provider from model ID or name
+                model.provider = this.inferProvider(model);
+            }
         });
+    }
+    
+    // Infer provider from model ID or name
+    inferProvider(model) {
+        const id = model.id ? model.id.toLowerCase() : '';
+        const name = model.name ? model.name.toLowerCase() : '';
+        
+        if (id.includes('openai') || name.includes('gpt') || name.includes('dall-e')) {
+            return 'OpenAI';
+        } else if (id.includes('anthropic') || name.includes('claude')) {
+            return 'Anthropic';
+        } else if (id.includes('google') || name.includes('gemini')) {
+            return 'Google';
+        } else if (id.includes('meta') || name.includes('llama')) {
+            return 'Meta';
+        } else if (id.includes('mistral')) {
+            return 'Mistral AI';
+        } else if (id.includes('cohere') || name.includes('command')) {
+            return 'Cohere';
+        } else if (id.includes('stability') || name.includes('stable diffusion')) {
+            return 'Stability AI';
+        }
+        
+        return 'Unknown Provider';
     }
     
     // Helper to generate random metrics for models that don't have them

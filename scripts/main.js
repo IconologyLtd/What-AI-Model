@@ -73,9 +73,16 @@ function displayModels(models) {
 
 // Create a model card element
 function createModelCard(model) {
+    // Log the model data to debug
+    console.log(`Creating card for model: ${model.name}`, model);
+    console.log(`Model metrics:`, model.metrics);
+    
     const card = document.createElement('div');
-    card.className = 'model-card';
+    card.className = 'model-card glow-on-hover';
     card.dataset.modelId = model.id;
+    
+    // Get provider icon
+    const providerIcon = getProviderIcon(model.provider);
     
     // Format capabilities as category tags
     const categoryTags = model.capabilities ? model.capabilities.map(capability => 
@@ -83,9 +90,9 @@ function createModelCard(model) {
     ).join('') : '';
     
     // Format metrics for display
-    const accuracyMetric = model.metrics?.accuracy ? `<div class="metric-value">${model.metrics.accuracy}/10</div>` : '';
-    const performanceMetric = model.metrics?.performance ? `<div class="metric-value">${model.metrics.performance}/10</div>` : '';
-    const priceMetric = model.metrics?.price ? `<div class="metric-value">${model.metrics.price}/10</div>` : '';
+    const accuracyMetric = model.metrics?.accuracy ? `<div class="metric-value">${model.metrics.accuracy}/10</div>` : '<div class="metric-value">N/A</div>';
+    const performanceMetric = model.metrics?.performance ? `<div class="metric-value">${model.metrics.performance}/10</div>` : '<div class="metric-value">N/A</div>';
+    const priceMetric = model.metrics?.price ? `<div class="metric-value">${model.metrics.price}/10</div>` : '<div class="metric-value">N/A</div>';
     
     // Format pricing
     const pricing = modelManager.formatPrice(model);
@@ -95,26 +102,26 @@ function createModelCard(model) {
     
     card.innerHTML = `
         <h3>${model.name}</h3>
-        <div class="model-provider">${model.provider || 'Unknown Provider'}</div>
+        <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
         <div class="model-description">${model.description || 'No description available.'}</div>
         <div class="model-categories">${categoryTags}</div>
-        <div class="model-strengths"><strong>Best for:</strong> ${strengths}</div>
-        <div class="model-pricing"><strong>Pricing:</strong> ${pricing}</div>
+        <div class="model-strengths"><i class="fas fa-check-circle"></i> <strong>Best for:</strong> ${strengths}</div>
+        <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
         <div class="model-metrics">
             <div class="metric">
                 ${accuracyMetric}
-                <div class="metric-label">Accuracy</div>
+                <div class="metric-label"><i class="fas fa-bullseye"></i></div>
             </div>
             <div class="metric">
                 ${performanceMetric}
-                <div class="metric-label">Performance</div>
+                <div class="metric-label"><i class="fas fa-bolt"></i></div>
             </div>
             <div class="metric">
                 ${priceMetric}
-                <div class="metric-label">Price</div>
+                <div class="metric-label"><i class="fas fa-tag"></i></div>
             </div>
         </div>
-        <button class="view-details-btn" data-model-id="${model.id}">View Details</button>
+        <button class="view-details-btn" data-model-id="${model.id}"><i class="fas fa-info-circle"></i> View Details</button>
     `;
     
     return card;
@@ -213,6 +220,31 @@ function setupEventListeners() {
     });
 }
 
+// Helper function to get provider icon
+function getProviderIcon(provider) {
+    if (!provider) return '<i class="fas fa-robot"></i>';
+    
+    const providerLower = provider.toLowerCase();
+    
+    if (providerLower.includes('openai')) {
+        return '<i class="fas fa-brain"></i>';
+    } else if (providerLower.includes('anthropic')) {
+        return '<i class="fas fa-user-astronaut"></i>';
+    } else if (providerLower.includes('google') || providerLower.includes('gemini')) {
+        return '<i class="fab fa-google"></i>';
+    } else if (providerLower.includes('meta') || providerLower.includes('llama')) {
+        return '<i class="fab fa-facebook"></i>';
+    } else if (providerLower.includes('mistral')) {
+        return '<i class="fas fa-wind"></i>';
+    } else if (providerLower.includes('cohere')) {
+        return '<i class="fas fa-link"></i>';
+    } else if (providerLower.includes('stability')) {
+        return '<i class="fas fa-image"></i>';
+    } else {
+        return '<i class="fas fa-robot"></i>';
+    }
+}
+
 // Display recommendations
 function displayRecommendations(recommendations, userNeeds) {
     const recommendationsContainer = document.getElementById('recommended-models');
@@ -232,48 +264,52 @@ function displayRecommendations(recommendations, userNeeds) {
     }
     
     // Create and append recommendation cards
-    recommendations.forEach(model => {
+    recommendations.forEach((model, index) => {
         const card = document.createElement('div');
-        card.className = 'model-card recommendation-card';
+        card.className = 'model-card recommendation-card glow-on-hover';
+        card.style.setProperty('--animation-order', index);
+        
+        // Get provider icon
+        const providerIcon = getProviderIcon(model.provider);
         
         // Format matched categories
         const matchedCategories = model.matchedCategories ? 
-            `<div class="matched-categories"><strong>Matches your needs for:</strong> ${model.matchedCategories.join(', ')}</div>` : '';
+            `<div class="matched-categories"><i class="fas fa-bullseye"></i> <strong>Matches your needs for:</strong> ${model.matchedCategories.join(', ')}</div>` : '';
         
         // Format match score
         const matchScore = model.matchScore ? 
-            `<div class="match-score"><strong>Match Score:</strong> ${model.matchScore}%</div>` : '';
+            `<div class="match-score"><i class="fas fa-percentage"></i> <strong>Match Score:</strong> ${model.matchScore}%</div>` : '';
         
         // Format metrics for display
-        const accuracyMetric = model.metrics?.accuracy ? `<div class="metric-value">${model.metrics.accuracy}/10</div>` : '';
-        const performanceMetric = model.metrics?.performance ? `<div class="metric-value">${model.metrics.performance}/10</div>` : '';
-        const priceMetric = model.metrics?.price ? `<div class="metric-value">${model.metrics.price}/10</div>` : '';
+        const accuracyMetric = model.metrics?.accuracy ? `<div class="metric-value">${model.metrics.accuracy}/10</div>` : '<div class="metric-value">N/A</div>';
+        const performanceMetric = model.metrics?.performance ? `<div class="metric-value">${model.metrics.performance}/10</div>` : '<div class="metric-value">N/A</div>';
+        const priceMetric = model.metrics?.price ? `<div class="metric-value">${model.metrics.price}/10</div>` : '<div class="metric-value">N/A</div>';
         
         // Format pricing
         const pricing = modelManager.formatPrice(model);
         
         card.innerHTML = `
             <h3>${model.name}</h3>
-            <div class="model-provider">${model.provider || 'Unknown Provider'}</div>
+            <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
             <div class="model-description">${model.description || 'No description available.'}</div>
             ${matchedCategories}
             ${matchScore}
-            <div class="model-pricing"><strong>Pricing:</strong> ${pricing}</div>
+            <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
             <div class="model-metrics">
                 <div class="metric">
                     ${accuracyMetric}
-                    <div class="metric-label">Accuracy</div>
+                    <div class="metric-label"><i class="fas fa-bullseye"></i></div>
                 </div>
                 <div class="metric">
                     ${performanceMetric}
-                    <div class="metric-label">Performance</div>
+                    <div class="metric-label"><i class="fas fa-bolt"></i></div>
                 </div>
                 <div class="metric">
                     ${priceMetric}
-                    <div class="metric-label">Price</div>
+                    <div class="metric-label"><i class="fas fa-tag"></i></div>
                 </div>
             </div>
-            <button class="view-details-btn" data-model-id="${model.id}">View Details</button>
+            <button class="view-details-btn" data-model-id="${model.id}"><i class="fas fa-info-circle"></i> View Details</button>
         `;
         
         recommendationsContainer.appendChild(card);
@@ -287,16 +323,37 @@ async function showModelDetails(modelId) {
     
     // Show loading state
     modalContent.innerHTML = '<div class="loading">Loading model details...</div>';
+    
+    // Create particles container if it doesn't exist
+    let particlesContainer = modal.querySelector('.modal-particles');
+    if (!particlesContainer) {
+        particlesContainer = document.createElement('div');
+        particlesContainer.className = 'modal-particles';
+        modal.querySelector('.modal-content').prepend(particlesContainer);
+    }
+    
+    // Show modal
     modal.classList.remove('hidden');
     
     try {
         // Get model details
         const model = await openRouterAPI.getModelDetails(modelId);
         
+        console.log('Model details:', model);
+        console.log('Provider:', model.provider);
+        
         if (!model) {
             modalContent.innerHTML = '<div class="error">Model details not found.</div>';
             return;
         }
+        
+        // Ensure the model has a provider
+        if (!model.provider) {
+            model.provider = modelManager.inferProvider(model);
+        }
+        
+        // Get provider icon
+        const providerIcon = getProviderIcon(model.provider);
         
         // Format capabilities as category tags
         const categoryTags = model.capabilities ? model.capabilities.map(capability => 
@@ -305,21 +362,21 @@ async function showModelDetails(modelId) {
         
         // Format context length
         const contextLength = model.context_length ? 
-            `<div class="model-context-length"><strong>Context Length:</strong> ${model.context_length.toLocaleString()} tokens</div>` : '';
+            `<div class="model-context-length"><i class="fas fa-exchange-alt"></i> <strong>Context Length:</strong> ${model.context_length.toLocaleString()} tokens</div>` : '';
         
         // Format pricing details
-        let pricingDetails = '<div class="model-pricing-details"><strong>Pricing Details:</strong>';
+        let pricingDetails = '<div class="model-pricing-details"><i class="fas fa-dollar-sign"></i> <strong>Pricing Details:</strong>';
         
         if (model.pricing) {
             if (model.pricing.prompt && model.pricing.completion) {
                 const promptPrice = model.pricing.prompt * 1000;
                 const completionPrice = model.pricing.completion * 1000;
                 pricingDetails += `
-                    <div>Input: $${promptPrice.toFixed(6)} per 1K tokens</div>
-                    <div>Output: $${completionPrice.toFixed(6)} per 1K tokens</div>
+                    <div><i class="fas fa-arrow-right"></i> Input: $${promptPrice.toFixed(6)} per 1K tokens</div>
+                    <div><i class="fas fa-arrow-left"></i> Output: $${completionPrice.toFixed(6)} per 1K tokens</div>
                 `;
             } else if (model.pricing.generation) {
-                pricingDetails += `<div>$${model.pricing.generation.toFixed(6)} per generation</div>`;
+                pricingDetails += `<div><i class="fas fa-image"></i> $${model.pricing.generation.toFixed(6)} per generation</div>`;
             } else {
                 pricingDetails += '<div>Pricing information not available</div>';
             }
@@ -330,34 +387,74 @@ async function showModelDetails(modelId) {
         pricingDetails += '</div>';
         
         // Format metrics
-        const metricsHTML = model.metrics ? `
-            <div class="model-metrics-details">
-                <h4>Performance Metrics</h4>
-                <div class="metrics-grid">
-                    <div class="metric-detail">
-                        <div class="metric-name">Accuracy</div>
-                        <div class="metric-bar">
-                            <div class="metric-fill" style="width: ${model.metrics.accuracy * 10}%"></div>
+        let metricsHTML = '';
+        if (model.metrics) {
+            // Log metrics data for debugging
+            console.log(`Modal metrics for ${model.name}:`, model.metrics);
+            
+            const accuracy = model.metrics.accuracy || 0;
+            const performance = model.metrics.performance || 0;
+            const price = model.metrics.price || 0;
+            
+            metricsHTML = `
+                <div class="model-metrics-details">
+                    <h4><i class="fas fa-chart-line"></i> Performance Metrics</h4>
+                    <div class="metrics-grid">
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-bullseye"></i> Accuracy</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: ${accuracy * 10}%"></div>
+                            </div>
+                            <div class="metric-value">${accuracy ? accuracy + '/10' : 'N/A'}</div>
                         </div>
-                        <div class="metric-value">${model.metrics.accuracy}/10</div>
-                    </div>
-                    <div class="metric-detail">
-                        <div class="metric-name">Performance</div>
-                        <div class="metric-bar">
-                            <div class="metric-fill" style="width: ${model.metrics.performance * 10}%"></div>
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-bolt"></i> Speed</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: ${performance * 10}%"></div>
+                            </div>
+                            <div class="metric-value">${performance ? performance + '/10' : 'N/A'}</div>
                         </div>
-                        <div class="metric-value">${model.metrics.performance}/10</div>
-                    </div>
-                    <div class="metric-detail">
-                        <div class="metric-name">Price (Value)</div>
-                        <div class="metric-bar">
-                            <div class="metric-fill" style="width: ${model.metrics.price * 10}%"></div>
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-tag"></i> Value</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: ${price * 10}%"></div>
+                            </div>
+                            <div class="metric-value">${price ? price + '/10' : 'N/A'}</div>
                         </div>
-                        <div class="metric-value">${model.metrics.price}/10</div>
                     </div>
                 </div>
-            </div>
-        ` : '';
+            `;
+        } else {
+            console.log(`No metrics data for ${model.name}`);
+            metricsHTML = `
+                <div class="model-metrics-details">
+                    <h4><i class="fas fa-chart-line"></i> Performance Metrics</h4>
+                    <div class="metrics-grid">
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-bullseye"></i> Accuracy</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="metric-value">N/A</div>
+                        </div>
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-bolt"></i> Speed</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="metric-value">N/A</div>
+                        </div>
+                        <div class="metric-detail">
+                            <div class="metric-name"><i class="fas fa-tag"></i> Value</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="metric-value">N/A</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
         
         // Get model strengths
         const strengths = modelManager.getModelStrengths(model);
@@ -366,60 +463,27 @@ async function showModelDetails(modelId) {
         modalContent.innerHTML = `
             <div class="model-details">
                 <h2>${model.name}</h2>
-                <div class="model-provider">${model.provider || 'Unknown Provider'}</div>
+                <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
                 <div class="model-categories">${categoryTags}</div>
                 <div class="model-description">${model.description || 'No description available.'}</div>
-                <div class="model-strengths"><strong>Best for:</strong> ${strengths}</div>
+                <div class="model-strengths"><i class="fas fa-check-circle"></i> <strong>Best for:</strong> ${strengths}</div>
                 ${contextLength}
                 ${pricingDetails}
                 ${metricsHTML}
             </div>
         `;
         
-        // Add custom styles for the metrics bars
-        const style = document.createElement('style');
-        style.textContent = `
-            .model-metrics-details {
-                margin-top: 2rem;
-            }
-            
-            .metrics-grid {
-                display: grid;
-                gap: 1rem;
-                margin-top: 1rem;
-            }
-            
-            .metric-detail {
-                display: grid;
-                grid-template-columns: 120px 1fr 50px;
-                align-items: center;
-                gap: 1rem;
-            }
-            
-            .metric-bar {
-                height: 12px;
-                background-color: #e9ecef;
-                border-radius: 6px;
-                overflow: hidden;
-            }
-            
-            .metric-fill {
-                height: 100%;
-                background-color: var(--primary-color);
-                border-radius: 6px;
-            }
-            
-            .model-pricing-details {
-                margin-top: 1rem;
-            }
-            
-            .model-pricing-details div {
-                margin-top: 0.5rem;
-                margin-left: 1rem;
-            }
-        `;
-        
-        document.head.appendChild(style);
+        // Trigger animation for metric bars
+        setTimeout(() => {
+            const metricFills = document.querySelectorAll('.metric-fill');
+            metricFills.forEach(fill => {
+                const width = fill.style.width;
+                fill.style.width = '0';
+                setTimeout(() => {
+                    fill.style.width = width;
+                }, 100);
+            });
+        }, 300);
         
     } catch (error) {
         console.error('Error showing model details:', error);
