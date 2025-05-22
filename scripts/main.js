@@ -230,36 +230,36 @@ function createModelCard(model) {
         `<div class="model-memory"><i class="fas fa-memory"></i> <strong>Memory:</strong> ${model.context_length.toLocaleString()} tokens</div>` : 
         '';
     
-    // Truncate description to 100 characters
-    const fullDescription = model.description || 'No description available.';
-    const truncatedDescription = fullDescription.length > 100 ? 
-        fullDescription.substring(0, 100) + '...' : 
-        fullDescription;
-    
-    card.innerHTML = `
-        <h3>${model.name}</h3>
-        <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
-        <div class="model-description">${truncatedDescription}</div>
-        <div class="model-categories">${categoryTags}</div>
-        <div class="model-strengths"><i class="fas fa-check-circle"></i> <strong>Best for:</strong> ${strengths}</div>
-        ${contextLength}
-        <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
-        <div class="model-metrics">
-            <div class="metric">
-                ${accuracyMetric}
-                <div class="metric-label"><i class="fas fa-bullseye"></i></div>
-            </div>
-            <div class="metric">
-                ${performanceMetric}
-                <div class="metric-label"><i class="fas fa-bolt"></i></div>
-            </div>
-            <div class="metric">
-                ${priceMetric}
-                <div class="metric-label"><i class="fas fa-tag"></i></div>
-            </div>
+// Store full description in data attribute
+const fullDescription = model.description || 'No description available.';
+const truncatedDescription = fullDescription.length > 100
+    ? fullDescription.substring(0, 100) + '...'
+    : fullDescription;
+
+card.innerHTML = `
+    <h3>${model.name}</h3>
+    <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
+    <div class="model-description" data-full-description="${fullDescription.replace(/"/g, '"')}">${truncatedDescription}</div>
+    <div class="model-categories">${categoryTags}</div>
+    <div class="model-strengths"><i class="fas fa-check-circle"></i> <strong>Best for:</strong> ${strengths}</div>
+    ${contextLength}
+    <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
+    <div class="model-metrics">
+        <div class="metric">
+            ${accuracyMetric}
+            <div class="metric-label"><i class="fas fa-bullseye"></i></div>
         </div>
-        <button class="view-details-btn" data-model-id="${model.id}"><i class="fas fa-info-circle"></i> View Details</button>
-    `;
+        <div class="metric">
+            ${performanceMetric}
+            <div class="metric-label"><i class="fas fa-bolt"></i></div>
+        </div>
+        <div class="metric">
+            ${priceMetric}
+            <div class="metric-label"><i class="fas fa-tag"></i></div>
+        </div>
+    </div>
+    <button class="view-details-btn" data-model-id="${model.id}"><i class="fas fa-info-circle"></i> View Details</button>
+`;
     
     return card;
 }
@@ -500,36 +500,35 @@ function displayRecommendations(recommendations, userNeeds) {
             `<div class="model-memory"><i class="fas fa-memory"></i> <strong>Memory:</strong> ${model.context_length.toLocaleString()} tokens</div>` : 
             '';
         
-        // Truncate description to 100 characters
-        const fullDescription = model.description || 'No description available.';
-        const truncatedDescription = fullDescription.length > 100 ? 
-            fullDescription.substring(0, 100) + '...' : 
-            fullDescription;
-        
-        card.innerHTML = `
-            <h3>${model.name}</h3>
-            <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
-            <div class="model-description">${truncatedDescription}</div>
-            ${matchedCategories}
-            ${matchScore}
-            ${contextLength}
-            <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
-            <div class="model-metrics">
-                <div class="metric">
-                    ${accuracyMetric}
-                    <div class="metric-label"><i class="fas fa-bullseye"></i></div>
-                </div>
-                <div class="metric">
-                    ${performanceMetric}
-                    <div class="metric-label"><i class="fas fa-bolt"></i></div>
-                </div>
-                <div class="metric">
-                    ${priceMetric}
-                    <div class="metric-label"><i class="fas fa-tag"></i></div>
-                </div>
-            </div>
-            <button class="view-details-btn" data-model-id="${model.id}"><i class="fas fa-info-circle"></i> View Details</button>
-        `;
+// Truncate description to 100 characters with ellipsis
+const truncatedDescription = model.description && model.description.length > 100
+    ? model.description.substring(0, 100) + '...'
+    : model.description || 'No description available.';
+
+card.innerHTML = `
+    <h3>${model.name}</h3>
+    <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
+    <div class="model-description">${truncatedDescription}</div>
+    ${matchedCategories}
+    ${matchScore}
+    ${contextLength}
+    <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
+    <div class="model-metrics">
+        <div class="metric">
+            ${accuracyMetric}
+            <div class="metric-label"><i class="fas fa-bullseye"></i></div>
+        </div>
+        <div class="metric">
+            ${performanceMetric}
+            <div class="metric-label"><i class="fas fa-bolt"></i></div>
+        </div>
+        <div class="metric">
+            ${priceMetric}
+            <div class="metric-label"><i class="fas fa-tag"></i></div>
+        </div>
+    </div>
+    <button class="view-details-btn" data-model-id="${model.id}"><i class="fas fa-info-circle"></i> View Details</button>
+`;
         
         recommendationsContainer.appendChild(card);
     });
@@ -583,10 +582,10 @@ function filterModelsBySearch(models, query) {
 async function showModelDetails(modelId) {
     const modal = document.getElementById('model-details-modal');
     const modalContent = document.getElementById('model-details-content');
-    
+
     // Show loading state
     modalContent.innerHTML = '<div class="loading">Loading model details...</div>';
-    
+
     // Create particles container if it doesn't exist
     let particlesContainer = modal.querySelector('.modal-particles');
     if (!particlesContainer) {
@@ -594,7 +593,7 @@ async function showModelDetails(modelId) {
         particlesContainer.className = 'modal-particles';
         modal.querySelector('.modal-content').prepend(particlesContainer);
     }
-    
+
     // Create modal banner container if it doesn't exist
     let modalBanner = modal.querySelector('.modal-banner');
     if (!modalBanner) {
@@ -602,49 +601,71 @@ async function showModelDetails(modelId) {
         modalBanner.className = 'modal-banner';
         modal.querySelector('.modal-content').prepend(modalBanner);
     }
-    
+
     // Show modal
     modal.classList.remove('hidden');
-    
+
     try {
         // Get model details - first try to get from the DOM if available
         let model;
-        
+
         // Try to find the model in the DOM first (faster and more reliable)
         const modelCard = document.querySelector(`.model-card[data-model-id="${modelId}"]`);
         if (modelCard) {
             // Extract basic info from the card
             const name = modelCard.querySelector('h3').textContent;
             const provider = modelCard.querySelector('.model-provider').textContent.trim();
-            const description = modelCard.querySelector('.model-description').textContent;
-            
+
+// Get the full description from the data attribute
+let description = modelCard.querySelector('.model-description').textContent;
+
+// Check if the description is truncated (ends with '...')
+if (description.endsWith('...')) {
+    // Get the full description from the data attribute
+    const fullDescription = modelCard.querySelector('.model-description').dataset.fullDescription;
+    if (fullDescription) {
+        description = fullDescription;
+    } else {
+        // If not available in dataset, try to get from API
+        try {
+            const apiModel = await openRouterAPI.getModelDetails(modelId);
+            if (apiModel && apiModel.description) {
+                description = apiModel.description;
+            }
+        } catch (apiError) {
+            console.error('Error fetching model details from API:', apiError);
+            // If API fails, use the truncated description as fallback
+        }
+    }
+}
+
             // Get metrics from the card
             const metricValues = Array.from(modelCard.querySelectorAll('.metric-value')).map(el => el.textContent);
-            
+
             // Extract strengths directly from the DOM if available
             let strengths = '';
             const strengthsElement = modelCard.querySelector('.model-strengths');
             if (strengthsElement) {
-                // Extract just the text after "Best for:" 
+                // Extract just the text after "Best for:"
                 const strengthsText = strengthsElement.textContent;
                 const match = strengthsText.match(/Best for:\s*(.*)/);
                 if (match && match[1]) {
                     strengths = match[1].trim();
                 }
             }
-            
+
             // Extract pricing directly from the DOM if available
             let pricingText = '';
             const pricingElement = modelCard.querySelector('.model-pricing');
             if (pricingElement) {
-                // Extract just the text after "Pricing:" 
+                // Extract just the text after "Pricing:"
                 const rawPricingText = pricingElement.textContent;
                 const pricingMatch = rawPricingText.match(/Pricing:\s*(.*)/);
                 if (pricingMatch && pricingMatch[1]) {
                     pricingText = pricingMatch[1].trim();
                 }
             }
-            
+
             // Create a model object from the DOM data
             model = {
                 id: modelId,
@@ -659,36 +680,61 @@ async function showModelDetails(modelId) {
                     price: metricValues[2] === 'N/A' ? null : parseFloat(metricValues[2])
                 }
             };
-            
+
             // Try to extract capabilities from category tags
             const categoryTags = modelCard.querySelectorAll('.category-tag');
             if (categoryTags.length > 0) {
                 model.capabilities = Array.from(categoryTags).map(tag => tag.textContent);
             }
-            
             console.log('Model details from DOM:', model);
         }
-        
+
         // If we couldn't get the model from the DOM, try the API
         if (!model) {
-            model = await openRouterAPI.getModelDetails(modelId);
-            console.log('Model details from API:', model);
+            try {
+                model = await openRouterAPI.getModelDetails(modelId);
+                console.log('Model details from API:', model);
+            } catch (apiError) {
+                console.error('Error fetching model details from API:', apiError);
+                // If API fails, show an error
+                modalContent.innerHTML = `
+                    <div class="error">
+                        <p>Sorry, we couldn't load the details for this model.</p>
+                        <p>Error: ${apiError.message || 'Failed to fetch model details'}</p>
+                        <button id="retry-details" class="submit-btn" style="margin-top: 20px;">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+
+                // Add event listener for retry button
+                setTimeout(() => {
+                    const retryButton = document.getElementById('retry-details');
+                    if (retryButton) {
+                        retryButton.addEventListener('click', () => {
+                            showModelDetails(modelId);
+                        });
+                    }
+                }, 100);
+
+                return;
+            }
         }
-        
+
         // If we still don't have a model, show an error
         if (!model) {
             modalContent.innerHTML = '<div class="error">Model details not found.</div>';
             return;
         }
-        
+
         // Ensure the model has a provider
         if (!model.provider) {
             model.provider = modelManager.inferProvider(model);
         }
-        
+
         // Get provider icon
         const providerIcon = getProviderIcon(model.provider);
-        
+
         // Update the modal banner with company name and model name
         const modalBanner = modal.querySelector('.modal-banner');
         if (modalBanner) {
@@ -697,12 +743,12 @@ async function showModelDetails(modelId) {
                 <div class="banner-model">${model.name || 'Unknown Model'}</div>
             `;
         }
-        
+
         // Format capabilities as category tags
-        const categoryTags = model.capabilities ? model.capabilities.map(capability => 
+        const categoryTags = model.capabilities ? model.capabilities.map(capability =>
             `<span class="category-tag">${modelManager.categories[capability]?.name || capability}</span>`
         ).join('') : '';
-        
+
         // If we got the model from the DOM, try to extract context length from the card
         if (!model.context_length && modelCard) {
             const memoryElement = modelCard.querySelector('.model-memory');
@@ -715,14 +761,15 @@ async function showModelDetails(modelId) {
                 }
             }
         }
-        
+
         // Format context length (memory) - now that we've potentially updated model.context_length
-        const contextLength = model.context_length ? 
-            `<div class="model-context-length"><i class="fas fa-memory"></i> <strong>Memory:</strong> ${model.context_length.toLocaleString()} tokens</div>` : '';
-        
+        const contextLength = model.context_length ?
+            `<div class="model-context-length"><i class="fas fa-memory"></i> <strong>Memory:</strong> ${model.context_length.toLocaleString()} tokens</div>` :
+            '';
+
         // Format pricing details - use the pricing text from the DOM if available
         let pricingDetails = '<div class="model-pricing-details"><i class="fas fa-dollar-sign"></i> <strong>Pricing Details:</strong>';
-        
+
         if (model.pricingText) {
             // Use the pricing text we extracted from the DOM
             pricingDetails += `<div>${model.pricingText}</div>`;
@@ -742,21 +789,21 @@ async function showModelDetails(modelId) {
         } else {
             pricingDetails += '<div>Pricing information not available</div>';
         }
-        
+
         pricingDetails += '</div>';
-        
+
         // Format metrics - ensure we have metrics even if they're empty
         let metricsHTML = '';
         const metrics = model.metrics || {};
-        
+
         // Log metrics data for debugging
         console.log(`Modal metrics for ${model.name}:`, metrics);
-        
+
         // Get metric values with fallbacks
         const accuracy = metrics.accuracy || 0;
         const performance = metrics.performance || 0;
         const price = metrics.price || 0;
-        
+
         // Always create the metrics HTML
         metricsHTML = `
             <div class="model-metrics-details">
@@ -786,10 +833,10 @@ async function showModelDetails(modelId) {
                 </div>
             </div>
         `;
-        
+
         // Use the strengths we extracted from the DOM if available, otherwise calculate them
         const strengths = model.strengths || (model.name ? modelManager.getModelStrengths(model) : 'General AI assistance');
-        
+
         // Populate modal content - ensure we have valid values for all fields
         modalContent.innerHTML = `
             <div class="model-details">
@@ -802,7 +849,7 @@ async function showModelDetails(modelId) {
                 ${metricsHTML}
             </div>
         `;
-        
+
         // Trigger animation for metric bars
         setTimeout(() => {
             const metricFills = document.querySelectorAll('.metric-fill');
@@ -814,14 +861,14 @@ async function showModelDetails(modelId) {
                 }, 100);
             });
         }, 300);
-        
+
     } catch (error) {
         console.error('Error showing model details:', error);
-        
+
         // Try to get basic model info from the ID for the banner
         let modelName = 'Unknown Model';
         let modelProvider = 'Unknown Provider';
-        
+
         // Try to extract provider and model name from the ID
         if (modelId) {
             const parts = modelId.split('/');
@@ -830,7 +877,7 @@ async function showModelDetails(modelId) {
                 modelName = parts[1].split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             }
         }
-        
+
         // Update the banner even in case of error
         const modalBanner = modal.querySelector('.modal-banner');
         if (modalBanner) {
@@ -840,7 +887,7 @@ async function showModelDetails(modelId) {
                 <div class="banner-model">${modelName}</div>
             `;
         }
-        
+
         // Show a more user-friendly error message with a retry button
         modalContent.innerHTML = `
             <div class="model-details">
@@ -852,7 +899,7 @@ async function showModelDetails(modelId) {
                         <i class="fas fa-redo"></i> Retry
                     </button>
                 </div>
-                
+
                 <div class="model-metrics-details">
                     <h4><i class="fas fa-chart-line"></i> Performance Metrics</h4>
                     <div class="metrics-grid">
@@ -881,7 +928,7 @@ async function showModelDetails(modelId) {
                 </div>
             </div>
         `;
-        
+
         // Add event listener for retry button
         setTimeout(() => {
             const retryButton = document.getElementById('retry-details');
