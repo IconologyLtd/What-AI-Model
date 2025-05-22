@@ -24,39 +24,6 @@
     </header>
 
     <main>
-        <section id="model-catalog" class="glow-on-hover">
-            <h2>AI Model Catalog</h2>
-            <div class="category-filters">
-                <h3>Filter by Category</h3>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-category="all">
-                        <i class="fas fa-layer-group"></i> All Models
-                    </button>
-                    <button class="filter-btn" data-category="coding">
-                        <i class="fas fa-code"></i> Coding & Development
-                    </button>
-                    <button class="filter-btn" data-category="chat">
-                        <i class="fas fa-comments"></i> General Chat
-                    </button>
-                    <button class="filter-btn" data-category="problem-solving">
-                        <i class="fas fa-puzzle-piece"></i> Problem Solving
-                    </button>
-                    <button class="filter-btn" data-category="it-support">
-                        <i class="fas fa-headset"></i> IT Support
-                    </button>
-                    <button class="filter-btn" data-category="content">
-                        <i class="fas fa-pen-fancy"></i> Content Creation
-                    </button>
-                    <button class="filter-btn" data-category="media">
-                        <i class="fas fa-image"></i> Media Generation
-                    </button>
-                </div>
-            </div>
-            <div id="models-container" class="models-grid">
-                <div class="loading">Loading models data...</div>
-            </div>
-        </section>
-
         <section id="recommendation" class="glow-on-hover">
             <div class="confetti-container"></div>
             <h2>Get a Recommendation</h2>
@@ -88,6 +55,39 @@
                 <button id="reset-recommendation" class="reset-btn">
                     <i class="fas fa-redo"></i> Start Over
                 </button>
+            </div>
+        </section>
+
+        <section id="model-catalog" class="glow-on-hover">
+            <h2>AI Model Catalog</h2>
+            <div class="category-filters">
+                <h3>Filter by Category</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">
+                        <i class="fas fa-layer-group"></i> All Models
+                    </button>
+                    <button class="filter-btn" data-category="coding">
+                        <i class="fas fa-code"></i> Coding & Development
+                    </button>
+                    <button class="filter-btn" data-category="chat">
+                        <i class="fas fa-comments"></i> General Chat
+                    </button>
+                    <button class="filter-btn" data-category="problem-solving">
+                        <i class="fas fa-puzzle-piece"></i> Problem Solving
+                    </button>
+                    <button class="filter-btn" data-category="it-support">
+                        <i class="fas fa-headset"></i> IT Support
+                    </button>
+                    <button class="filter-btn" data-category="content">
+                        <i class="fas fa-pen-fancy"></i> Content Creation
+                    </button>
+                    <button class="filter-btn" data-category="media">
+                        <i class="fas fa-image"></i> Media Generation
+                    </button>
+                </div>
+            </div>
+            <div id="models-container" class="models-grid">
+                <div class="loading">Loading models data...</div>
             </div>
         </section>
     </main>

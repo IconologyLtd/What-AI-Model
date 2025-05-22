@@ -501,7 +501,7 @@ function initGlowEffects() {
             opacity: var(--glow-intensity);
             pointer-events: none;
             mix-blend-mode: overlay;
-            z-index: 1;
+            z-index: 0; /* Set to 0 to ensure it appears behind the cards */
         }
     `;
     document.head.appendChild(style);
