@@ -2,9 +2,12 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize the app directly
-    // The API key is expected to be in a meta tag in the HTML
-    // For this simple app, we'll use fallback data if the API key is not available
+    // The API key is expected to be in a meta tag in the HTML or .env file
     initializeApp();
+    
+    // Set up automatic refresh every 30 minutes (1800000 ms)
+    // This ensures the app gets the latest models periodically
+    setInterval(refreshModels, 1800000);
 });
 
 // Initialize the application
@@ -52,7 +55,7 @@ async function loadModels() {
     }
 }
 
-// Display models in the UI
+// Display models in the UI with pagination
 function displayModels(models) {
     const modelsContainer = document.getElementById('models-container');
     
@@ -64,14 +67,70 @@ function displayModels(models) {
     // Clear the container
     modelsContainer.innerHTML = '';
     
-    // Create and append model cards
-    models.forEach(model => {
+    // Pagination settings
+    const modelsPerPage = 6;
+    const totalPages = Math.ceil(models.length / modelsPerPage);
+    
+    // Get or initialize current page
+    let currentPage = parseInt(sessionStorage.getItem('currentModelPage') || '1');
+    if (currentPage > totalPages) currentPage = 1;
+    
+    // Calculate start and end indices for the current page
+    const startIndex = (currentPage - 1) * modelsPerPage;
+    const endIndex = Math.min(startIndex + modelsPerPage, models.length);
+    
+    // Get models for the current page
+    const currentModels = models.slice(startIndex, endIndex);
+    
+    // Create and append model cards for the current page
+    currentModels.forEach(model => {
         const modelCard = createModelCard(model);
         modelsContainer.appendChild(modelCard);
     });
+    
+    // Add pagination controls if there's more than one page
+    if (totalPages > 1) {
+        const paginationControls = document.createElement('div');
+        paginationControls.className = 'pagination-controls';
+        
+        // Previous button
+        const prevButton = document.createElement('button');
+        prevButton.className = 'pagination-btn';
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i> Previous';
+        prevButton.disabled = currentPage === 1;
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                sessionStorage.setItem('currentModelPage', (currentPage - 1).toString());
+                displayModels(models);
+            }
+        });
+        
+        // Page indicator
+        const pageIndicator = document.createElement('div');
+        pageIndicator.className = 'page-indicator';
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        
+        // Next button
+        const nextButton = document.createElement('button');
+        nextButton.className = 'pagination-btn';
+        nextButton.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                sessionStorage.setItem('currentModelPage', (currentPage + 1).toString());
+                displayModels(models);
+            }
+        });
+        
+        paginationControls.appendChild(prevButton);
+        paginationControls.appendChild(pageIndicator);
+        paginationControls.appendChild(nextButton);
+        
+        modelsContainer.appendChild(paginationControls);
+    }
 }
 
-// Create a model card element
+// Create a model card element with truncated description
 function createModelCard(model) {
     // Log the model data to debug
     console.log(`Creating card for model: ${model.name}`, model);
@@ -100,10 +159,16 @@ function createModelCard(model) {
     // Get model strengths
     const strengths = modelManager.getModelStrengths(model);
     
+    // Truncate description to 100 characters
+    const fullDescription = model.description || 'No description available.';
+    const truncatedDescription = fullDescription.length > 100 ? 
+        fullDescription.substring(0, 100) + '...' : 
+        fullDescription;
+    
     card.innerHTML = `
         <h3>${model.name}</h3>
         <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
-        <div class="model-description">${model.description || 'No description available.'}</div>
+        <div class="model-description">${truncatedDescription}</div>
         <div class="model-categories">${categoryTags}</div>
         <div class="model-strengths"><i class="fas fa-check-circle"></i> <strong>Best for:</strong> ${strengths}</div>
         <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
@@ -218,6 +283,28 @@ function setupEventListeners() {
             modal.classList.add('hidden');
         }
     });
+    
+    // Manual refresh button
+    const refreshButton = document.getElementById('refresh-models-btn');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', () => {
+            // Add spinning animation to the button icon
+            const icon = refreshButton.querySelector('i');
+            icon.classList.add('fa-spin');
+            
+            // Disable the button during refresh
+            refreshButton.disabled = true;
+            
+            // Call the refresh function
+            refreshModels().finally(() => {
+                // Re-enable the button and stop spinning when done
+                setTimeout(() => {
+                    icon.classList.remove('fa-spin');
+                    refreshButton.disabled = false;
+                }, 1000);
+            });
+        });
+    }
 }
 
 // Helper function to get provider icon
@@ -245,7 +332,7 @@ function getProviderIcon(provider) {
     }
 }
 
-// Display recommendations
+// Display recommendations with truncated descriptions
 function displayRecommendations(recommendations, userNeeds) {
     const recommendationsContainer = document.getElementById('recommended-models');
     const recommendationsResult = document.getElementById('recommendations-result');
@@ -288,10 +375,16 @@ function displayRecommendations(recommendations, userNeeds) {
         // Format pricing
         const pricing = modelManager.formatPrice(model);
         
+        // Truncate description to 100 characters
+        const fullDescription = model.description || 'No description available.';
+        const truncatedDescription = fullDescription.length > 100 ? 
+            fullDescription.substring(0, 100) + '...' : 
+            fullDescription;
+        
         card.innerHTML = `
             <h3>${model.name}</h3>
             <div class="model-provider">${providerIcon} ${model.provider === undefined ? 'Unknown Provider' : model.provider}</div>
-            <div class="model-description">${model.description || 'No description available.'}</div>
+            <div class="model-description">${truncatedDescription}</div>
             ${matchedCategories}
             ${matchScore}
             <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
@@ -615,6 +708,44 @@ async function showModelDetails(modelId) {
                 });
             }
         }, 100);
+    }
+}
+
+// Refresh models from API
+async function refreshModels() {
+    console.log('Refreshing models from API...');
+    try {
+        // Show a subtle notification that refresh is happening
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.innerHTML = '<i class="fas fa-sync fa-spin"></i> Refreshing model data...';
+        document.body.appendChild(notification);
+        
+        // Get the current active category
+        const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
+        
+        // Reload models from API
+        await modelManager.loadModels();
+        
+        // Get models for the current active category
+        const models = modelManager.getModelsByCategory(activeCategory);
+        
+        // Update the display
+        displayModels(models);
+        
+        // Update notification
+        notification.innerHTML = '<i class="fas fa-check"></i> Model data refreshed!';
+        notification.classList.add('success');
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 500);
+        }, 3000);
+        
+    } catch (error) {
+        console.error('Error refreshing models:', error);
+        showError("Failed to refresh models. Using existing data.");
     }
 }
 

@@ -34,17 +34,26 @@ class ModelManager {
     // Load models from API or fallback data
     async loadModels() {
         try {
-            // For this demo, we'll use the fallback data directly
-            // In a real app with proper API key handling, you would use the API
-            this.models = openRouterAPI.getFallbackModels();
+            // Attempt to fetch models from the API
+            console.log('Attempting to fetch models from OpenRouter API...');
+            this.models = await openRouterAPI.getModels();
+            
+            // If we got an empty array, fall back to sample data
+            if (!this.models || this.models.length === 0) {
+                console.warn('No models returned from API. Using fallback data.');
+                this.models = openRouterAPI.getFallbackModels();
+            } else {
+                console.log('Successfully fetched models from API:', this.models.length);
+            }
             
             // Enhance models with additional metadata if needed
             this.enhanceModels();
             
             return this.models;
         } catch (error) {
-            console.error('Error loading models:', error);
+            console.error('Error loading models from API:', error);
             // Use fallback data in case of error
+            console.warn('Using fallback model data due to API error');
             this.models = openRouterAPI.getFallbackModels();
             this.enhanceModels();
             return this.models;

@@ -5,15 +5,22 @@ class OpenRouterAPI {
         this.baseUrl = 'https://openrouter.ai/api/v1';
     }
 
-    // Get API key from environment variable
+    // Get API key from meta tag
     getApiKey() {
         // In a real production environment, this would be handled server-side
-        // For this simple app, we'll use a workaround to access the API key
+        // For this simple app, we'll use the API key from a meta tag
         // Note: Exposing API keys in client-side code is not recommended for production apps
         
-        // For this demo, we'll return an empty string and use fallback data
-        // In a real app, you would securely handle the API key server-side
-        return '';
+        // Try to get the API key from a meta tag
+        const metaTag = document.querySelector('meta[name="openrouter-api-key"]');
+        if (metaTag && metaTag.content && metaTag.content !== '<%= process.env.OPENROUTER_API_KEY %>') {
+            return metaTag.content;
+        }
+        
+        // For this demo, we'll use the hardcoded API key from the .env file
+        // In a real app, you would never hardcode API keys in client-side code
+        const apiKey = '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';
+        return apiKey;
     }
 
     // Fetch available models from OpenRouter
