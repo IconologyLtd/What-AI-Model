@@ -279,6 +279,9 @@ function createEnhancedConfetti() {
 // Create a single firework explosion
 function createFirework(container, colors, posX, posY, delay) {
     setTimeout(() => {
+        // Get the confetti container
+        const confettiContainer = container.querySelector('.confetti-container');
+        
         // Add a bright flash at the explosion point
         const explosionFlash = document.createElement('div');
         explosionFlash.style.position = 'absolute';
@@ -292,7 +295,7 @@ function createFirework(container, colors, posX, posY, delay) {
         explosionFlash.style.transform = 'translate(-50%, -50%) scale(0.1)';
         explosionFlash.style.opacity = '0';
         explosionFlash.style.zIndex = '1';
-        container.appendChild(explosionFlash);
+        confettiContainer.appendChild(explosionFlash);
         
         // Animate the explosion flash - faster animation
         const flashKeyframes = `
@@ -361,8 +364,8 @@ function createFirework(container, colors, posX, posY, delay) {
             // Minimal delay between particles
             const particleDelay = Math.random() * 0.1; // 0-0.1s delay (reduced from 0-0.2s)
             
-            // Add to container
-            container.appendChild(confetti);
+            // Add to confetti container
+            confettiContainer.appendChild(confetti);
             
             // Create explosion animation - particles fly outward in all directions
             // Shorter distance for quicker disappearance
@@ -422,7 +425,7 @@ function createFirework(container, colors, posX, posY, delay) {
         flash.style.zIndex = '0';
         flash.style.pointerEvents = 'none';
         flash.style.transition = 'opacity 0.2s ease'; // Faster transition
-        container.appendChild(flash);
+        confettiContainer.appendChild(flash);
         
         // Trigger flash effect - quicker flash
         setTimeout(() => {

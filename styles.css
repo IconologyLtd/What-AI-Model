@@ -1422,7 +1422,30 @@ body.dark-mode footer::before {
 /* Add a container style to ensure confetti is properly positioned */
 #recommendation {
   position: relative;
+}
+
+/* Fix for the gradient line at the top of the recommendation section */
+#recommendation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: var(--gradient-primary);
+  z-index: 2; /* Ensure the gradient appears above other elements */
+}
+
+/* Create a separate container for confetti to allow overflow */
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   overflow: visible; /* Allow confetti to overflow */
+  pointer-events: none; /* Ensure clicks pass through to elements below */
+  z-index: 1; /* Below the gradient line but above other content */
 }
 
 /* Enhanced Glow Effect */
