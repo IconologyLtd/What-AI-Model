@@ -249,172 +249,23 @@ function initRecommendationConfetti() {
     }
 }
 
-// Create enhanced confetti elements with more variety and better animation
+// Create multiple quick firework-style confetti animations
 function createEnhancedConfetti() {
     const container = document.getElementById('recommendation');
     
-    // Brighter, more vibrant colors for better visibility
+    // Orange theme colors only
     const colors = [
         '#FF8200', // Brand orange
         '#FFA300', // Bright yellow/orange
         '#FF5A00', // Bright orange/red
-        '#31B700', // Bright green
-        '#00A3FF', // Bright blue
-        '#FF00FF', // Bright magenta
-        '#FFFF00', // Bright yellow
-        '#FFFFFF'  // White for contrast
+        '#FFCC00', // Light orange/yellow
+        '#FF9E45'  // Soft orange
     ];
     
-    // Create more confetti pieces for a richer effect (increased from 120 to 150)
-    for (let i = 0; i < 150; i++) {
-        const confetti = document.createElement('div');
-        confetti.classList.add('confetti');
-        
-        // Random position across the full width
-        const posX = Math.random() * 100;
-        confetti.style.left = `${posX}%`;
-        
-        // Distribute confetti throughout the section, not just at the bottom
-        // Start position is distributed throughout the section height
-        const startY = Math.random() * 100; // 0-100% of section height
-        confetti.style.top = `${startY}%`;
-        
-        // Larger random size (increased from 5-15px to 10-25px)
-        const size = Math.random() * 15 + 10; // 10-25px
-        confetti.style.width = `${size}px`;
-        confetti.style.height = `${size}px`;
-        
-        // Random color
-        const colorIndex = Math.floor(Math.random() * colors.length);
-        confetti.style.backgroundColor = colors[colorIndex];
-        
-        // Add drop shadow for better visibility
-        confetti.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
-        
-        // Random shape
-        const shapes = ['circle', 'square', 'triangle', 'rectangle', 'diamond', 'star'];
-        const shapeIndex = Math.floor(Math.random() * shapes.length);
-        
-        if (shapes[shapeIndex] === 'circle') {
-            confetti.style.borderRadius = '50%';
-        } else if (shapes[shapeIndex] === 'square') {
-            confetti.style.borderRadius = '3px';
-        } else if (shapes[shapeIndex] === 'triangle') {
-            confetti.style.width = '0';
-            confetti.style.height = '0';
-            confetti.style.backgroundColor = 'transparent';
-            confetti.style.borderLeft = `${size/2}px solid transparent`;
-            confetti.style.borderRight = `${size/2}px solid transparent`;
-            confetti.style.borderBottom = `${size}px solid ${colors[colorIndex]}`;
-            // Add glow effect to triangle
-            confetti.style.filter = 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.7))';
-        } else if (shapes[shapeIndex] === 'rectangle') {
-            confetti.style.height = `${size/2}px`;
-            confetti.style.borderRadius = '2px';
-        } else if (shapes[shapeIndex] === 'diamond') {
-            confetti.style.transform = 'rotate(45deg)';
-        } else if (shapes[shapeIndex] === 'star') {
-            // Create a star shape using clip-path
-            confetti.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
-            confetti.style.backgroundColor = colors[colorIndex];
-        }
-        
-        // Higher opacity for better visibility (increased from default to 1.0)
-        confetti.style.opacity = '1.0';
-        
-        // Random animation duration - slightly longer for more visibility
-        const duration = Math.random() * 4 + 3; // 3-7s (increased from 2-5s)
-        confetti.style.animationDuration = `${duration}s`;
-        
-        // Random animation delay - staggered for better effect
-        const delay = Math.random() * 1.5;
-        confetti.style.animationDelay = `${delay}s`;
-        
-        // Random horizontal drift - increased for more movement
-        const drift = Math.random() * 150 - 75; // -75px to 75px (increased from -50px to 50px)
-        confetti.style.animationName = 'none'; // Temporarily disable animation
-        
-        // Add to container
-        container.appendChild(confetti);
-        
-        // Create custom keyframes for this confetti piece with improved animation
-        // Different animation based on starting position
-        const startingFromTop = startY < 30; // If starting in top 30% of section
-        
-        let keyframes;
-        if (startingFromTop) {
-            // For confetti starting at the top, use the original falling animation
-            keyframes = `
-                @keyframes confetti-fall-${i} {
-                    0% {
-                        transform: translateY(-50px) translateX(0) rotate(0deg) scale(1);
-                        opacity: 1;
-                    }
-                    10% {
-                        transform: translateY(50px) translateX(${drift * 0.3}px) rotate(${Math.random() * 180}deg) scale(${Math.random() * 0.2 + 0.9});
-                        opacity: 1;
-                    }
-                    50% {
-                        transform: translateY(300px) translateX(${drift}px) rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.5 + 0.8});
-                        opacity: 0.9;
-                    }
-                    90% {
-                        opacity: 0.7;
-                    }
-                    100% {
-                        transform: translateY(700px) translateX(${drift * 2}px) rotate(${Math.random() * 720}deg) scale(0.5);
-                        opacity: 0;
-                    }
-                }
-            `;
-        } else {
-            // For confetti starting in the middle or bottom, use an explosion-like animation
-            const randomAngle = Math.random() * 360; // Random angle for explosion direction
-            const distance = 100 + Math.random() * 300; // Random distance to travel
-            const xMovement = distance * Math.cos(randomAngle * Math.PI / 180);
-            const yMovement = distance * Math.sin(randomAngle * Math.PI / 180);
-            
-            keyframes = `
-                @keyframes confetti-fall-${i} {
-                    0% {
-                        transform: translateX(0) translateY(0) rotate(0deg) scale(0.3);
-                        opacity: 0;
-                    }
-                    10% {
-                        transform: translateX(${xMovement * 0.1}px) translateY(${yMovement * 0.1}px) rotate(${Math.random() * 180}deg) scale(1);
-                        opacity: 1;
-                    }
-                    50% {
-                        transform: translateX(${xMovement * 0.5}px) translateY(${yMovement * 0.5}px) rotate(${Math.random() * 360}deg) scale(${Math.random() * 0.3 + 0.8});
-                        opacity: 0.9;
-                    }
-                    100% {
-                        transform: translateX(${xMovement}px) translateY(${yMovement}px) rotate(${Math.random() * 720}deg) scale(0.2);
-                        opacity: 0;
-                    }
-                }
-            `;
-        }
-        
-        // Add the keyframes to the document
-        const styleElement = document.createElement('style');
-        styleElement.textContent = keyframes;
-        document.head.appendChild(styleElement);
-        
-        // Apply the custom animation with improved easing
-        confetti.style.animation = `confetti-fall-${i} ${duration}s forwards cubic-bezier(0.22, 0.68, 0.6, 1.0) ${delay}s`;
-        
-        // Add a subtle pulsing effect to some confetti pieces
-        if (i % 4 === 0) {
-            confetti.style.animation += `, pulse 1s infinite alternate ${delay}s`;
-        }
-        
-        // Remove after animation completes
-        setTimeout(() => {
-            confetti.remove();
-            styleElement.remove();
-        }, (duration + delay) * 1000);
-    }
+    // Create multiple fireworks with slight delays between them
+    createFirework(container, colors, 45, 55, 0); // First firework - left side
+    createFirework(container, colors, 55, 45, 150); // Second firework - right side
+    createFirework(container, colors, 50, 60, 300); // Third firework - center bottom
     
     // Add a celebratory sound effect
     const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
@@ -423,135 +274,169 @@ function createEnhancedConfetti() {
     } catch (e) {
         console.log('Audio play error:', e);
     }
-    
-    // Add a flash effect to draw attention to the confetti
-    const flash = document.createElement('div');
-    flash.style.position = 'absolute';
-    flash.style.top = '0';
-    flash.style.left = '0';
-    flash.style.width = '100%';
-    flash.style.height = '100%';
-    flash.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-    flash.style.opacity = '0';
-    flash.style.zIndex = '0';
-    flash.style.pointerEvents = 'none';
-    flash.style.transition = 'opacity 0.3s ease';
-    container.appendChild(flash);
-    
-    // Trigger flash effect
-    setTimeout(() => {
-        flash.style.opacity = '1';
-        setTimeout(() => {
-            flash.style.opacity = '0';
-            setTimeout(() => {
-                flash.remove();
-            }, 300);
-        }, 100);
-    }, 0);
-    
-    // Create a second wave of confetti after a short delay for a more dramatic effect
-    setTimeout(() => {
-        createSecondWaveConfetti(container, colors);
-    }, 500);
 }
 
-// Create a second wave of confetti for a more dramatic effect
-function createSecondWaveConfetti(container, colors) {
-    // Create fewer pieces for the second wave
-    for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.classList.add('confetti');
+// Create a single firework explosion
+function createFirework(container, colors, posX, posY, delay) {
+    setTimeout(() => {
+        // Add a bright flash at the explosion point
+        const explosionFlash = document.createElement('div');
+        explosionFlash.style.position = 'absolute';
+        explosionFlash.style.left = `${posX}%`;
+        explosionFlash.style.top = `${posY}%`;
+        explosionFlash.style.width = '40px'; // Smaller flash
+        explosionFlash.style.height = '40px'; // Smaller flash
+        explosionFlash.style.borderRadius = '50%';
+        explosionFlash.style.backgroundColor = '#FFCC00';
+        explosionFlash.style.boxShadow = '0 0 20px 10px rgba(255, 130, 0, 0.8)';
+        explosionFlash.style.transform = 'translate(-50%, -50%) scale(0.1)';
+        explosionFlash.style.opacity = '0';
+        explosionFlash.style.zIndex = '1';
+        container.appendChild(explosionFlash);
         
-        // Random position across the full width
-        const posX = Math.random() * 100;
-        confetti.style.left = `${posX}%`;
-        
-        // Start from the middle of the section
-        confetti.style.top = `${30 + Math.random() * 40}%`; // 30-70% of section height
-        
-        // Larger random size
-        const size = Math.random() * 15 + 10; // 10-25px
-        confetti.style.width = `${size}px`;
-        confetti.style.height = `${size}px`;
-        
-        // Random color
-        const colorIndex = Math.floor(Math.random() * colors.length);
-        confetti.style.backgroundColor = colors[colorIndex];
-        
-        // Add drop shadow for better visibility
-        confetti.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
-        
-        // Random shape - use more stars and circles for the second wave
-        const shapes = ['circle', 'circle', 'star', 'star', 'diamond', 'square'];
-        const shapeIndex = Math.floor(Math.random() * shapes.length);
-        
-        if (shapes[shapeIndex] === 'circle') {
-            confetti.style.borderRadius = '50%';
-        } else if (shapes[shapeIndex] === 'square') {
-            confetti.style.borderRadius = '3px';
-        } else if (shapes[shapeIndex] === 'diamond') {
-            confetti.style.transform = 'rotate(45deg)';
-        } else if (shapes[shapeIndex] === 'star') {
-            // Create a star shape using clip-path
-            confetti.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
-            confetti.style.backgroundColor = colors[colorIndex];
-        }
-        
-        // Higher opacity for better visibility
-        confetti.style.opacity = '1.0';
-        
-        // Random animation duration
-        const duration = Math.random() * 3 + 2; // 2-5s
-        
-        // Random animation delay
-        const delay = Math.random() * 0.5;
-        
-        // Add to container
-        container.appendChild(confetti);
-        
-        // Create explosion-like animation
-        const randomAngle = Math.random() * 360;
-        const distance = 100 + Math.random() * 200;
-        const xMovement = distance * Math.cos(randomAngle * Math.PI / 180);
-        const yMovement = distance * Math.sin(randomAngle * Math.PI / 180);
-        
-        const keyframes = `
-            @keyframes confetti-explode-${i} {
-                0% {
-                    transform: translateX(0) translateY(0) rotate(0deg) scale(0.3);
-                    opacity: 0;
-                }
-                10% {
-                    transform: translateX(${xMovement * 0.1}px) translateY(${yMovement * 0.1}px) rotate(${Math.random() * 180}deg) scale(1);
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateX(${xMovement}px) translateY(${yMovement}px) rotate(${Math.random() * 720}deg) scale(0.2);
-                    opacity: 0;
-                }
+        // Animate the explosion flash - faster animation
+        const flashKeyframes = `
+            @keyframes explosion-flash-${posX}-${posY} {
+                0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+                20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
             }
         `;
+        const flashStyle = document.createElement('style');
+        flashStyle.textContent = flashKeyframes;
+        document.head.appendChild(flashStyle);
         
-        // Add the keyframes to the document
-        const styleElement = document.createElement('style');
-        styleElement.textContent = keyframes;
-        document.head.appendChild(styleElement);
+        explosionFlash.style.animation = `explosion-flash-${posX}-${posY} 0.4s forwards cubic-bezier(0.22, 0.68, 0.6, 1.0)`;
         
-        // Apply the custom animation
-        confetti.style.animation = `confetti-explode-${i} ${duration}s forwards cubic-bezier(0.22, 0.68, 0.6, 1.0) ${delay}s`;
+        // Remove flash after animation completes
+        setTimeout(() => {
+            explosionFlash.remove();
+            flashStyle.remove();
+        }, 400);
         
-        // Add a pulsing effect to some confetti pieces
-        if (i % 3 === 0) {
-            confetti.style.animation += `, pulse 0.8s infinite alternate ${delay}s`;
+        // Create confetti pieces for the firework - fewer particles
+        const confettiCount = 40; // Reduced from 100 to 40
+        
+        for (let i = 0; i < confettiCount; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            
+            // All confetti starts from the same central point
+            confetti.style.left = `${posX}%`;
+            confetti.style.top = `${posY}%`;
+            
+            // Smaller size for particles
+            const size = Math.random() * 6 + 2; // 2-8px (reduced from 5-17px)
+            confetti.style.width = `${size}px`;
+            confetti.style.height = `${size}px`;
+            
+            // Random color from orange palette
+            const colorIndex = Math.floor(Math.random() * colors.length);
+            confetti.style.backgroundColor = colors[colorIndex];
+            
+            // Add smaller glow effect
+            confetti.style.boxShadow = `0 0 3px 1px ${colors[colorIndex]}80`;
+            
+            // Random shape - more circles for smaller particles
+            const shapes = ['circle', 'circle', 'circle', 'square', 'diamond', 'star'];
+            const shapeIndex = Math.floor(Math.random() * shapes.length);
+            
+            if (shapes[shapeIndex] === 'circle') {
+                confetti.style.borderRadius = '50%';
+            } else if (shapes[shapeIndex] === 'square') {
+                confetti.style.borderRadius = '2px';
+            } else if (shapes[shapeIndex] === 'diamond') {
+                confetti.style.transform = 'rotate(45deg)';
+            } else if (shapes[shapeIndex] === 'star') {
+                confetti.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+                confetti.style.backgroundColor = colors[colorIndex];
+            }
+            
+            // Full opacity for better visibility
+            confetti.style.opacity = '1.0';
+            
+            // Much shorter animation duration
+            const duration = Math.random() * 0.6 + 0.4; // 0.4-1.0s (reduced from 0.8-2.3s)
+            
+            // Minimal delay between particles
+            const particleDelay = Math.random() * 0.1; // 0-0.1s delay (reduced from 0-0.2s)
+            
+            // Add to container
+            container.appendChild(confetti);
+            
+            // Create explosion animation - particles fly outward in all directions
+            // Shorter distance for quicker disappearance
+            const angle = Math.random() * 360; // Random angle for explosion direction
+            const distance = 30 + Math.random() * 120; // 30-150px (reduced from 50-300px)
+            
+            // Calculate movement based on angle
+            const xMovement = distance * Math.cos(angle * Math.PI / 180);
+            const yMovement = distance * Math.sin(angle * Math.PI / 180);
+            
+            // Create keyframes for firework explosion - faster animation
+            const keyframes = `
+                @keyframes firework-particle-${posX}-${posY}-${i} {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0.3);
+                        opacity: 0;
+                    }
+                    10% {
+                        transform: translate(-50%, -50%) scale(1);
+                        opacity: 1;
+                    }
+                    30% {
+                        transform: translate(calc(-50% + ${xMovement * 0.3}px), calc(-50% + ${yMovement * 0.3}px)) rotate(${Math.random() * 180}deg) scale(0.8);
+                        opacity: 0.9;
+                    }
+                    100% {
+                        transform: translate(calc(-50% + ${xMovement}px), calc(-50% + ${yMovement}px)) rotate(${Math.random() * 360}deg) scale(0.1);
+                        opacity: 0;
+                    }
+                }
+            `;
+            
+            // Add the keyframes to the document
+            const styleElement = document.createElement('style');
+            styleElement.textContent = keyframes;
+            document.head.appendChild(styleElement);
+            
+            // Apply the animation
+            confetti.style.animation = `firework-particle-${posX}-${posY}-${i} ${duration}s forwards cubic-bezier(0.22, 0.68, 0.6, 1.0) ${particleDelay}s`;
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                confetti.remove();
+                styleElement.remove();
+            }, (duration + particleDelay) * 1000);
         }
         
-        // Remove after animation completes
+        // Add a brief flash effect for this firework
+        const flash = document.createElement('div');
+        flash.style.position = 'absolute';
+        flash.style.top = '0';
+        flash.style.left = '0';
+        flash.style.width = '100%';
+        flash.style.height = '100%';
+        flash.style.backgroundColor = 'rgba(255, 130, 0, 0.1)'; // Lighter flash
+        flash.style.opacity = '0';
+        flash.style.zIndex = '0';
+        flash.style.pointerEvents = 'none';
+        flash.style.transition = 'opacity 0.2s ease'; // Faster transition
+        container.appendChild(flash);
+        
+        // Trigger flash effect - quicker flash
         setTimeout(() => {
-            confetti.remove();
-            styleElement.remove();
-        }, (duration + delay) * 1000);
-    }
+            flash.style.opacity = '1';
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => {
+                    flash.remove();
+                }, 200);
+            }, 50);
+        }, 0);
+    }, delay);
 }
+
 
 // Enhanced Glow Effects on Hover
 function initGlowEffects() {
