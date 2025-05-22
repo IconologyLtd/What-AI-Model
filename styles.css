@@ -328,7 +328,7 @@ button:active {
 }
 
 .submit-btn {
-  background: var(--gradient-accent); /* Orange gradient */
+  background: var(--gradient-secondary); /* Orange gradient */
   color: white;
   font-weight: 600;
   padding: 0.85rem 2.2rem;
@@ -564,6 +564,87 @@ footer p {
   opacity: 0.9;
 }
 
+/* Display Options */
+.display-options {
+  position: relative;
+  z-index: 1;
+  margin-bottom: var(--space-md);
+  display: flex;
+  justify-content: center;
+  padding: var(--space-md) 0;
+}
+
+.display-options label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 500;
+  color: var(--color-dark);
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-fast);
+}
+
+.display-options label:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .display-options label {
+  color: var(--color-light);
+  background-color: rgba(44, 42, 41, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .display-options label:hover {
+  background-color: rgba(44, 42, 41, 0.9);
+}
+
+.display-options i {
+  color: var(--color-primary);
+}
+
+#cards-per-page {
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--color-primary);
+  color: var(--color-dark);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-left: var(--space-xs);
+}
+
+body.dark-mode #cards-per-page {
+  background-color: rgba(44, 42, 41, 0.8);
+  color: var(--color-light);
+}
+
+#cards-per-page:hover, #cards-per-page:focus {
+  background-color: rgba(255, 255, 255, 0.8);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 130, 0, 0.3);
+}
+
+body.dark-mode #cards-per-page:hover, 
+body.dark-mode #cards-per-page:focus {
+  background-color: rgba(44, 42, 41, 0.9);
+}
+
+#cards-per-page option {
+  background-color: var(--color-light);
+  color: var(--color-dark);
+}
+
+body.dark-mode #cards-per-page option {
+  background-color: var(--color-dark);
+  color: var(--color-light);
+}
+
 /* Section Header with Refresh Button */
 .section-header {
   display: flex;
@@ -641,6 +722,80 @@ footer p {
 .notification.fade-out {
   opacity: 0;
   transform: translateY(-20px);
+}
+
+/* Search Box Styling */
+.search-container {
+  margin-bottom: var(--space-lg);
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.search-icon {
+  position: absolute;
+  left: var(--space-lg);
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+}
+
+#model-search {
+  width: 100%;
+  padding: var(--space-lg) var(--space-lg) var(--space-lg) calc(var(--space-lg) * 2.5);
+  border: 2px solid var(--color-primary);
+  border-radius: 50px;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-md);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 10px rgba(255, 130, 0, 0.2);
+  transition: all var(--transition-normal);
+}
+
+#model-search:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.3), 0 4px 15px rgba(255, 130, 0, 0.3);
+  background-color: white;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: var(--space-lg);
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all var(--transition-fast);
+  display: none; /* Hidden by default, shown when search has content */
+}
+
+.clear-search-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Dark mode styles for search box */
+body.dark-mode #model-search {
+  background-color: rgba(44, 42, 41, 0.8);
+  border-color: var(--color-primary);
+  color: var(--color-light);
+}
+
+body.dark-mode #model-search::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+body.dark-mode .search-icon,
+body.dark-mode .clear-search-btn {
+  color: var(--color-primary);
 }
 
 /* Enhanced Category Filters */
@@ -781,7 +936,7 @@ body.dark-mode .category-tag {
   border: 1px solid rgba(255, 130, 0, 0.3); /* Orange */
 }
 
-.model-strengths, .model-pricing {
+.model-strengths, .model-pricing, .model-memory {
   margin-bottom: var(--space-md);
   font-size: var(--font-size-sm);
   display: flex;
@@ -790,9 +945,14 @@ body.dark-mode .category-tag {
   color: white; /* White text for better contrast */
 }
 
-.model-strengths i, .model-pricing i {
+.model-strengths i, .model-pricing i, .model-memory i {
   color: var(--color-primary);
   margin-top: 4px;
+}
+
+/* Memory icon specific styling */
+.fa-memory {
+  color: #0066CC !important; /* Blue color for memory icon to distinguish it */
 }
 
 /* Make check-circle icon orange in normal mode */
@@ -1173,6 +1333,11 @@ body.dark-mode .model-details .model-context-length,
 body.dark-mode .model-details .model-pricing-details {
   background: rgba(255, 255, 255, 0.03);
   color: var(--color-light);
+}
+
+/* Apply memory icon styling to model-context-length as well */
+.model-details .model-context-length i.fa-memory {
+  color: #0066CC !important; /* Blue color for memory icon to distinguish it */
 }
 
 .model-metrics-details {

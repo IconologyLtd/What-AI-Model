@@ -67,8 +67,11 @@ function displayModels(models) {
     // Clear the container
     modelsContainer.innerHTML = '';
     
-    // Pagination settings
-    const modelsPerPage = 6;
+    // Get the number of models per page from the dropdown or session storage
+    const cardsPerPageSelect = document.getElementById('cards-per-page');
+    // Try to get the value from session storage first, then from the dropdown, or default to 6
+    const storedCardsPerPage = sessionStorage.getItem('cardsPerPage');
+    const modelsPerPage = parseInt(storedCardsPerPage || (cardsPerPageSelect ? cardsPerPageSelect.value : 6));
     const totalPages = Math.ceil(models.length / modelsPerPage);
     
     // Get or initialize current page
@@ -93,6 +96,7 @@ function displayModels(models) {
         const paginationControls = document.createElement('div');
         paginationControls.className = 'pagination-controls';
         
+        // Create pagination elements
         // Previous button
         const prevButton = document.createElement('button');
         prevButton.className = 'pagination-btn';
@@ -122,11 +126,73 @@ function displayModels(models) {
             }
         });
         
-        paginationControls.appendChild(prevButton);
-        paginationControls.appendChild(pageIndicator);
-        paginationControls.appendChild(nextButton);
+        // Create a container for the pagination controls with flexbox layout
+        const paginationContainer = document.createElement('div');
+        paginationContainer.className = 'pagination-controls';
+        paginationContainer.style.display = 'flex';
+        paginationContainer.style.justifyContent = 'center';
+        paginationContainer.style.alignItems = 'center';
+        paginationContainer.style.width = '100%';
+        paginationContainer.style.marginTop = '20px';
+        paginationContainer.style.marginBottom = '20px';
         
-        modelsContainer.appendChild(paginationControls);
+        // Add the pagination buttons
+        paginationContainer.appendChild(prevButton);
+        paginationContainer.appendChild(pageIndicator);
+        paginationContainer.appendChild(nextButton);
+        
+        // Add the pagination container to the models container
+        modelsContainer.appendChild(paginationContainer);
+        
+        // Cards per page selector - positioned below the pagination controls
+        const displayOptions = document.createElement('div');
+        displayOptions.className = 'display-options';
+        displayOptions.style.display = 'flex';
+        displayOptions.style.justifyContent = 'center';
+        displayOptions.style.alignItems = 'center';
+        displayOptions.style.marginTop = '10px';
+        displayOptions.innerHTML = `
+            <label for="cards-per-page">
+                <i class="fas fa-th-large"></i> Cards per page:
+                <select id="cards-per-page">
+                    <option value="3" ${modelsPerPage === 3 ? 'selected' : ''}>3</option>
+                    <option value="6" ${modelsPerPage === 6 ? 'selected' : ''}>6</option>
+                    <option value="9" ${modelsPerPage === 9 ? 'selected' : ''}>9</option>
+                    <option value="12" ${modelsPerPage === 12 ? 'selected' : ''}>12</option>
+                    <option value="24" ${modelsPerPage === 24 ? 'selected' : ''}>24</option>
+                </select>
+            </label>
+        `;
+        
+        // Add the display options below the pagination controls
+        modelsContainer.appendChild(displayOptions);
+        
+        // Add event listener for the cards per page dropdown
+        const cardsPerPageSelect = document.getElementById('cards-per-page');
+        if (cardsPerPageSelect) {
+            cardsPerPageSelect.addEventListener('change', () => {
+                // Store the selected value in session storage
+                sessionStorage.setItem('cardsPerPage', cardsPerPageSelect.value);
+                
+                // Reset to page 1 when changing the number of cards per page
+                sessionStorage.setItem('currentModelPage', '1');
+                
+                // Get the current active category and search query
+                const activeCategory = document.querySelector('.filter-btn.active').dataset.category;
+                const searchQuery = document.getElementById('model-search').value.trim();
+                
+                // Get models for the current category
+                const categoryModels = modelManager.getModelsByCategory(activeCategory);
+                
+                // Apply search filter if there's a search query
+                const filteredModels = searchQuery 
+                    ? filterModelsBySearch(categoryModels, searchQuery) 
+                    : categoryModels;
+                
+                // Update the display with the new cards per page setting
+                displayModels(filteredModels);
+            });
+        }
     }
 }
 
@@ -159,6 +225,11 @@ function createModelCard(model) {
     // Get model strengths
     const strengths = modelManager.getModelStrengths(model);
     
+    // Format context length (memory)
+    const contextLength = model.context_length ? 
+        `<div class="model-memory"><i class="fas fa-memory"></i> <strong>Memory:</strong> ${model.context_length.toLocaleString()} tokens</div>` : 
+        '';
+    
     // Truncate description to 100 characters
     const fullDescription = model.description || 'No description available.';
     const truncatedDescription = fullDescription.length > 100 ? 
@@ -171,6 +242,7 @@ function createModelCard(model) {
         <div class="model-description">${truncatedDescription}</div>
         <div class="model-categories">${categoryTags}</div>
         <div class="model-strengths"><i class="fas fa-check-circle"></i> <strong>Best for:</strong> ${strengths}</div>
+        ${contextLength}
         <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
         <div class="model-metrics">
             <div class="metric">
@@ -194,6 +266,44 @@ function createModelCard(model) {
 
 // Set up event listeners
 function setupEventListeners() {
+    // Search functionality
+    const searchInput = document.getElementById('model-search');
+    const clearSearchBtn = document.getElementById('clear-search');
+    
+    // Show/hide clear button based on search input content
+    searchInput.addEventListener('input', () => {
+        const searchQuery = searchInput.value.trim();
+        clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
+        
+        // Get the current active category
+        const activeCategory = document.querySelector('.filter-btn.active').dataset.category;
+        
+        // Get models for the current category
+        const categoryModels = modelManager.getModelsByCategory(activeCategory);
+        
+        // Filter models by search query
+        const filteredModels = searchQuery 
+            ? filterModelsBySearch(categoryModels, searchQuery) 
+            : categoryModels;
+        
+        // Display filtered models
+        displayModels(filteredModels);
+    });
+    
+    // Clear search button
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        
+        // Reset to current category filter
+        const activeCategory = document.querySelector('.filter-btn.active').dataset.category;
+        const filteredModels = modelManager.getModelsByCategory(activeCategory);
+        displayModels(filteredModels);
+        
+        // Focus back on search input
+        searchInput.focus();
+    });
+    
     // Category filter buttons
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(button => {
@@ -205,7 +315,14 @@ function setupEventListeners() {
             // Filter models by category
             const category = button.dataset.category;
             const filteredModels = modelManager.getModelsByCategory(category);
-            displayModels(filteredModels);
+            
+            // Apply search filter if there's a search query
+            const searchQuery = document.getElementById('model-search').value.trim();
+            const finalFilteredModels = searchQuery 
+                ? filterModelsBySearch(filteredModels, searchQuery) 
+                : filteredModels;
+            
+            displayModels(finalFilteredModels);
         });
     });
     
@@ -305,6 +422,9 @@ function setupEventListeners() {
             });
         });
     }
+    
+    // We don't need this duplicate event listener for cards-per-page
+    // The event listener is already added in the displayModels function
 }
 
 // Helper function to get provider icon
@@ -375,6 +495,11 @@ function displayRecommendations(recommendations, userNeeds) {
         // Format pricing
         const pricing = modelManager.formatPrice(model);
         
+        // Format context length (memory)
+        const contextLength = model.context_length ? 
+            `<div class="model-memory"><i class="fas fa-memory"></i> <strong>Memory:</strong> ${model.context_length.toLocaleString()} tokens</div>` : 
+            '';
+        
         // Truncate description to 100 characters
         const fullDescription = model.description || 'No description available.';
         const truncatedDescription = fullDescription.length > 100 ? 
@@ -387,6 +512,7 @@ function displayRecommendations(recommendations, userNeeds) {
             <div class="model-description">${truncatedDescription}</div>
             ${matchedCategories}
             ${matchScore}
+            ${contextLength}
             <div class="model-pricing"><i class="fas fa-tag"></i> <strong>Pricing:</strong> ${pricing}</div>
             <div class="model-metrics">
                 <div class="metric">
@@ -406,6 +532,50 @@ function displayRecommendations(recommendations, userNeeds) {
         `;
         
         recommendationsContainer.appendChild(card);
+    });
+}
+
+// Filter models by search query
+function filterModelsBySearch(models, query) {
+    query = query.toLowerCase();
+    
+    return models.filter(model => {
+        // Search in model name
+        if (model.name && model.name.toLowerCase().includes(query)) {
+            return true;
+        }
+        
+        // Search in model provider
+        if (model.provider && model.provider.toLowerCase().includes(query)) {
+            return true;
+        }
+        
+        // Search in model description
+        if (model.description && model.description.toLowerCase().includes(query)) {
+            return true;
+        }
+        
+        // Search in model capabilities/categories
+        if (model.capabilities && model.capabilities.some(capability => {
+            // Check the capability itself
+            if (capability.toLowerCase().includes(query)) {
+                return true;
+            }
+            
+            // Check the category name if available
+            const categoryName = modelManager.categories[capability]?.name;
+            return categoryName && categoryName.toLowerCase().includes(query);
+        })) {
+            return true;
+        }
+        
+        // Search in model strengths
+        const strengths = modelManager.getModelStrengths(model);
+        if (strengths && strengths.toLowerCase().includes(query)) {
+            return true;
+        }
+        
+        return false;
     });
 }
 
@@ -533,9 +703,22 @@ async function showModelDetails(modelId) {
             `<span class="category-tag">${modelManager.categories[capability]?.name || capability}</span>`
         ).join('') : '';
         
-        // Format context length
+        // If we got the model from the DOM, try to extract context length from the card
+        if (!model.context_length && modelCard) {
+            const memoryElement = modelCard.querySelector('.model-memory');
+            if (memoryElement) {
+                const memoryText = memoryElement.textContent;
+                const match = memoryText.match(/Memory:\s*([\d,]+)\s*tokens/);
+                if (match && match[1]) {
+                    const contextLengthValue = parseInt(match[1].replace(/,/g, ''));
+                    model.context_length = contextLengthValue;
+                }
+            }
+        }
+        
+        // Format context length (memory) - now that we've potentially updated model.context_length
         const contextLength = model.context_length ? 
-            `<div class="model-context-length"><i class="fas fa-exchange-alt"></i> <strong>Context Length:</strong> ${model.context_length.toLocaleString()} tokens</div>` : '';
+            `<div class="model-context-length"><i class="fas fa-memory"></i> <strong>Memory:</strong> ${model.context_length.toLocaleString()} tokens</div>` : '';
         
         // Format pricing details - use the pricing text from the DOM if available
         let pricingDetails = '<div class="model-pricing-details"><i class="fas fa-dollar-sign"></i> <strong>Pricing Details:</strong>';
