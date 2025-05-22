@@ -107,8 +107,18 @@
     </main>
 
     <footer>
-        <p>Data provided by OpenRouter API</p>
-        <p>Created by Christopher Farnfield at Iconology Ltd with the help of AI</p>
+        <div class="footer-section">
+            <div class="data-status-indicator">
+                <i class="fas fa-circle" id="data-status-icon"></i>
+                <span id="data-status-text">Checking data source...</span>
+            </div>
+        </div>
+    <div class="footer-section">
+        <p><a href="test-live-data.html" class="verify-link"><i class="fas fa-check-circle"></i> Verify Live Data</a></p>
+    </div>
+        <div class="footer-section">
+            <p>Created by Christopher Farnfield at Iconology Ltd with the assistance of AI</p>
+        </div>
     </footer>
 
     <div id="model-details-modal" class="modal hidden">

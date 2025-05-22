@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Live Data Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .test-container {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        .warning {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+            border: 1px solid #faebcc;
+        }
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 10px;
+            overflow: auto;
+            max-height: 300px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #337ab7;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Live Data Verification</h1>
+    
+    <div class="test-container">
+        <h2>What This Test Does</h2>
+        <p>This test verifies whether the "Connected to OpenRouter API - Live data" message in the main application is accurate by checking for the presence of a special test property in the API response.</p>
+        <p>The backend adds a <code>test_property: 'live_data_verified'</code> to the response when it successfully connects to the OpenRouter API. This test will check if that property exists.</p>
+        
+        <button id="run-test">Run Test</button>
+        
+        <div id="result" style="display: none;"></div>
+    </div>
+    
+    <div id="explanation" style="display: none;">
+        <h2>How It Works</h2>
+        <p>The verification process works as follows:</p>
+        <ol>
+            <li>The frontend makes a request to our backend API endpoint <code>/api/models</code></li>
+            <li>The backend makes a request to the OpenRouter API</li>
+            <li>When the backend receives a successful response from OpenRouter, it adds a <code>test_property: 'live_data_verified'</code> to the response</li>
+            <li>The frontend checks for this property to determine if it's using live data</li>
+        </ol>
+        <p>If the test property is present, it confirms we're using live data from the OpenRouter API. If it's missing, we might be using fallback data.</p>
+    </div>
+    
+    <a href="index.html" class="back-link">← Back to main application</a>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const runTestButton = document.getElementById('run-test');
+            const resultDiv = document.getElementById('result');
+            const explanationDiv = document.getElementById('explanation');
+            
+            runTestButton.addEventListener('click', async () => {
+                // Show loading state
+                resultDiv.style.display = 'block';
+                resultDiv.className = '';
+                resultDiv.innerHTML = '<p>Testing connection to API...</p>';
+                
+                try {
+                    // Make a request to our backend API
+                    const response = await fetch('/api/models', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+                    
+                    // Parse the response
+                    const data = await response.json();
+                    
+                    // Check if the test property exists
+                    if (data.test_property === 'live_data_verified') {
+                        // Success - we're using live data
+                        resultDiv.className = 'success';
+                        resultDiv.innerHTML = `
+                            <h3>✅ Verification Successful</h3>
+                            <p>The "Connected to OpenRouter API - Live data" message is accurate! The API response contains the verification property.</p>
+                            <p>This confirms that:</p>
+                            <ul>
+                                <li>The backend successfully connected to the OpenRouter API</li>
+                                <li>The data displayed in the application is coming from the live API</li>
+                                <li>The verification system is working correctly</li>
+                            </ul>
+                        `;
+                    } else if (data.fallback) {
+                        // Using fallback data
+                        resultDiv.className = 'warning';
+                        resultDiv.innerHTML = `
+                            <h3>⚠️ Using Fallback Data</h3>
+                            <p>The application is currently using fallback data, not live data from the OpenRouter API.</p>
+                            <p>This could be because:</p>
+                            <ul>
+                                <li>The OpenRouter API is currently unavailable</li>
+                                <li>There might be an issue with the API key</li>
+                                <li>There could be network connectivity issues</li>
+                            </ul>
+                            <p>The application should display "Using fallback data - API connection may be unavailable" in this case.</p>
+                        `;
+                    } else {
+                        // No test property but not using fallback data - unexpected state
+                        resultDiv.className = 'error';
+                        resultDiv.innerHTML = `
+                            <h3>❌ Verification Failed</h3>
+                            <p>The "Connected to OpenRouter API - Live data" message may not be accurate. The verification property is missing from the API response.</p>
+                            <p>This could indicate:</p>
+                            <ul>
+                                <li>The backend is not properly adding the verification property</li>
+                                <li>The response might be coming from a cached source</li>
+                                <li>There might be an issue with the API integration</li>
+                            </ul>
+                            <p>Response data structure:</p>
+                            <pre>${JSON.stringify(data, null, 2).substring(0, 500)}...</pre>
+                        `;
+                    }
+                    
+                    // Show the explanation
+                    explanationDiv.style.display = 'block';
+                    
+                } catch (error) {
+                    // Error making the request
+                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = `
+                        <h3>❌ Test Failed</h3>
+                        <p>There was an error testing the API connection:</p>
+                        <p>${error.message}</p>
+                        <p>This could indicate:</p>
+                        <ul>
+                            <li>The backend server might not be running</li>
+                            <li>There might be network connectivity issues</li>
+                            <li>The API endpoint might have changed or is unavailable</li>
+                        </ul>
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

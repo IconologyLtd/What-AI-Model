@@ -12,16 +12,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Initialize the application
 async function initializeApp() {
+    // Initialize data status in footer
+    const statusIndicator = document.getElementById('data-status-text');
+    const statusIcon = document.getElementById('data-status-icon');
+    if (statusIndicator && statusIcon) {
+        statusIndicator.textContent = 'Checking data source...';
+        statusIcon.classList.remove('fa-check-circle', 'fa-exclamation-triangle');
+        statusIcon.classList.add('fa-circle');
+        statusIndicator.style.color = '';
+    }
+    
     try {
         // Load models
         await loadModels();
         
         // Set up event listeners
         setupEventListeners();
-        
     } catch (error) {
         console.error('Error initializing app:', error);
         showError("There was an error initializing the application. Please try refreshing the page.");
+        
+        // Update data status indicator to show error
+        if (statusIndicator && statusIcon) {
+            statusIndicator.textContent = 'Error connecting to data source';
+            statusIcon.classList.remove('fa-circle');
+            statusIcon.classList.add('fa-exclamation-triangle');
+            statusIndicator.style.color = '#ffcc00';
+        }
     }
 }
 
@@ -38,7 +55,32 @@ async function loadModels() {
         
         // Display all models initially
         displayModels(models);
-        
+
+        // Update data source status in footer
+        const isFallback = models.some(model => model.fallback);
+        const statusIndicator = document.getElementById('data-status-text');
+        const statusIcon = document.getElementById('data-status-icon');
+
+        // Check for our test property to verify live data
+        const hasTestProperty = modelManager.hasTestProperty();
+
+        if (isFallback) {
+            statusIndicator.textContent = 'Using fallback data - API connection may be unavailable';
+            statusIcon.classList.remove('fa-circle', 'fa-check-circle');
+            statusIcon.classList.add('fa-exclamation-triangle');
+            statusIndicator.style.color = '#ffcc00';
+        } else if (hasTestProperty) {
+            statusIndicator.textContent = 'Connected to OpenRouter API - Live data (Verified)';
+            statusIcon.classList.remove('fa-circle', 'fa-exclamation-triangle');
+            statusIcon.classList.add('fa-check-circle');
+            statusIndicator.style.color = '#4CAF50';
+        } else {
+            statusIndicator.textContent = 'Connected to OpenRouter API - Live data';
+            statusIcon.classList.remove('fa-circle', 'fa-exclamation-triangle');
+            statusIcon.classList.add('fa-check-circle');
+            statusIndicator.style.color = '#4CAF50';
+        }
+
     } catch (error) {
         console.error('Error loading models:', error);
         modelsContainer.innerHTML = `
@@ -52,6 +94,17 @@ async function loadModels() {
         // Use fallback data
         const fallbackModels = openRouterAPI.getFallbackModels();
         displayModels(fallbackModels);
+        
+        // Update data source status in footer to show we're using fallback data
+        const statusIndicator = document.getElementById('data-status-text');
+        const statusIcon = document.getElementById('data-status-icon');
+        
+        if (statusIndicator && statusIcon) {
+            statusIndicator.textContent = 'Using fallback data - API connection unavailable';
+            statusIcon.classList.remove('fa-circle');
+            statusIcon.classList.add('fa-exclamation-triangle');
+            statusIndicator.style.color = '#ffcc00';
+        }
     }
 }
 

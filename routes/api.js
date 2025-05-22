@@ -7,7 +7,11 @@ const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
 // Get models from OpenRouter
 router.get('/models', async (req, res) => {
+  console.log('API request received for /models');
+  console.log('Using API key:', process.env.OPENROUTER_API_KEY);
+  
   try {
+    console.log('Making request to OpenRouter API...');
     const response = await axios.get(`${OPENROUTER_BASE_URL}/models`, {
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
@@ -15,9 +19,20 @@ router.get('/models', async (req, res) => {
       }
     });
     
-    res.json(response.data);
+    console.log('OpenRouter API response received:', response.status);
+    
+    // Add a test property to verify we're getting live data
+    const responseData = {
+      ...response.data,
+      test_property: 'live_data_verified'
+    };
+    
+    console.log('Sending response with test_property added');
+    res.json(responseData);
   } catch (error) {
     console.error('Error fetching models from OpenRouter:', error.message);
+    console.error('API Key used:', process.env.OPENROUTER_API_KEY);
+    console.error('Full error:', error);
     res.status(500).json({ 
       error: 'Failed to fetch models', 
       message: error.message,

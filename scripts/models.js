@@ -3,6 +3,7 @@
 class ModelManager {
     constructor() {
         this.models = [];
+        this.apiResponse = null; // Store the full API response
         this.categories = {
             'coding': {
                 name: 'Coding & Development',
@@ -36,12 +37,19 @@ class ModelManager {
         try {
             // Attempt to fetch models from the API
             console.log('Attempting to fetch models from OpenRouter API...');
-            this.models = await openRouterAPI.getModels();
+            const response = await openRouterAPI.getModels();
+            
+            // Store the full API response
+            this.apiResponse = response;
+            
+            // Extract models from the response
+            this.models = response.data || response;
             
             // If we got an empty array, fall back to sample data
             if (!this.models || this.models.length === 0) {
                 console.warn('No models returned from API. Using fallback data.');
                 this.models = openRouterAPI.getFallbackModels();
+                this.apiResponse = null; // Clear API response since we're using fallback
             } else {
                 console.log('Successfully fetched models from API:', this.models.length);
             }
@@ -183,6 +191,18 @@ class ModelManager {
     // Get all available categories
     getCategories() {
         return this.categories;
+    }
+    
+    // Check if the API response has our test property
+    hasTestProperty() {
+        // Log the API response for debugging
+        console.log('Checking for test property in API response:', this.apiResponse);
+        
+        // Check if we have an API response and if it contains the test property
+        const hasProperty = this.apiResponse && this.apiResponse.test_property === 'live_data_verified';
+        console.log('Has test property:', hasProperty);
+        
+        return hasProperty;
     }
 
     // Recommend models based on user needs and preferences

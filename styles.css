@@ -1,7 +1,7 @@
 /* Modern Design System for What AI Model App - Enhanced Version */
 :root {
   /* Primary Gradient Theme - Using brand colors */
-  --gradient-primary: linear-gradient(135deg, #2C2A29 0%, #FF8200 50%, #FFFFFF 100%);
+  --gradient-primary: linear-gradient(135deg, #2C2A29 0%, #FF8200 50%, #ffffff 100%);
   --gradient-secondary: linear-gradient(135deg, #FF8200 0%, #FFA300 50%, #FF8200 100%);
   --gradient-accent: linear-gradient(135deg, #FF8200 0%, #FF6A00 50%, #FF8200 100%);
   
@@ -53,6 +53,58 @@
   --transition-slow: 0.5s ease;
   --animation-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
+
+/* Data status footer styles */
+#data-status-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #f5f5f5;
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+
+.footer-section {
+    display: flex;
+    justify-content: center;
+}
+
+.data-status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.data-status-indicator i {
+    font-size: 12px;
+}
+
+#data-status-text {
+    margin: 0;
+    font-weight: 500;
+}
+
+.dark-mode #data-status-footer {
+    background-color: #222;
+    border-top-color: #444;
+    color: #fff;
+}
+
+.dark-mode .fa-check-circle {
+    color: #4CAF50;
+}
+
+.dark-mode .fa-exclamation-triangle {
+    color: #ffcc00;
+}
+
 
 /* Import Brand Fonts */
 @font-face {
@@ -537,12 +589,14 @@ section:hover {
 
 /* Enhanced Footer */
 footer {
-  background: var(--color-dark);
+  background: linear-gradient(135deg, #2C2A29 0%, #FF8200 100%);
   color: white;
   text-align: center;
-  padding: var(--space-lg);
+  padding: var(--space-xl);
   position: relative;
   overflow: hidden;
+  border-radius: 0;
+  box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
 footer::before {
@@ -552,16 +606,20 @@ footer::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(44, 42, 41, 0.15) 0%, rgba(255, 130, 0, 0.15) 100%); /* Brand colors */
+  background: linear-gradient(135deg, rgba(44, 42, 41, 0.2) 0%, rgba(255, 130, 0, 0.2) 100%);
   z-index: 0;
+  opacity: 0.7;
 }
 
 footer p {
   position: relative;
   z-index: 1;
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   opacity: 0.9;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Display Options */
@@ -1914,4 +1972,40 @@ body.dark-mode .recommendation-card {
   transform: translateY(-5px) rotate(5deg);
   background: rgba(255, 255, 255, 0.2);
   color: white;
+}
+
+/* Verify Link Styling */
+.verify-link {
+  color: white;
+  font-size: var(--font-size-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all var(--transition-normal);
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.verify-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.verify-link i {
+  color: var(--color-primary);
+}
+
+body.dark-mode .verify-link {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .verify-link:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
