@@ -584,14 +584,15 @@ footer p {
 
 /* Enhanced Model Card */
 .model-card {
-  background-color: var(--card-bg);
+  background-color: #1a2e4c !important; /* Blue background similar to recommendation card - with !important to override any other styles */
+  color: white; /* White text for better contrast on blue background */
   border-radius: var(--card-border-radius);
   box-shadow: var(--card-shadow);
   padding: var(--space-xl);
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 3px solid var(--color-primary) !important; /* Orange border for emphasis with !important to ensure it's applied */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -627,14 +628,14 @@ footer p {
 
 .model-card h3 {
   margin-bottom: var(--space-xs);
-  color: var(--color-primary);
+  color: white; /* White text for better contrast */
   font-size: var(--font-size-xl);
   position: relative;
   display: inline-block;
 }
 
 .model-card .model-provider {
-  color: var(--color-secondary);
+  color: rgba(255, 255, 255, 0.9); /* Slightly transparent white for better hierarchy */
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-md);
   font-weight: 600;
@@ -651,7 +652,7 @@ body.dark-mode .model-card .model-provider {
 .model-card .model-description {
   margin-bottom: var(--space-md);
   font-size: var(--font-size-md);
-  color: var(--color-dark);
+  color: white; /* White text for better contrast */
   flex-grow: 1;
   line-height: 1.7;
 }
@@ -665,13 +666,13 @@ body.dark-mode .model-card .model-provider {
 
 /* Enhanced Category Tags */
 .category-tag {
-  background: linear-gradient(135deg, rgba(44, 42, 41, 0.1) 0%, rgba(255, 130, 0, 0.1) 100%); /* Brand colors */
+  background: rgba(255, 130, 0, 0.2); /* More visible orange background */
   border-radius: 50px;
   padding: 0.35rem 0.85rem;
   font-size: var(--font-size-sm); /* Increased from xs to sm */
-  color: var(--color-primary);
+  color: white; /* White text for better contrast on blue background */
   font-weight: 600;
-  border: 1px solid rgba(255, 130, 0, 0.2); /* Orange */
+  border: 1px solid rgba(255, 130, 0, 0.4); /* More visible orange border */
   transition: all var(--transition-fast);
   display: inline-flex;
   align-items: center;
@@ -695,6 +696,7 @@ body.dark-mode .category-tag {
   display: flex;
   align-items: flex-start;
   gap: var(--space-xs);
+  color: white; /* White text for better contrast */
 }
 
 .model-strengths i, .model-pricing i {
@@ -719,34 +721,37 @@ body.dark-mode .category-tag {
 
 .metric {
   text-align: center;
-  padding: var(--space-sm); /* Reduced padding to prevent overflow */
-  background-color: rgba(248, 249, 250, 0.7);
+  padding: var(--space-md); /* Increased padding for more prominence */
+  background-color: rgba(255, 130, 0, 0.2); /* Orange background with transparency */
   border-radius: var(--card-border-radius);
   transition: all var(--transition-normal);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 2px solid var(--color-primary); /* Orange border for emphasis */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: visible; /* Ensure content isn't cut off */
   min-width: 0; /* Allow content to shrink if needed */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
 }
 
 .metric:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 130, 0, 0.3); /* Slightly more opaque on hover */
 }
 
 .metric-value {
   font-weight: bold;
-  color: var(--color-primary);
-  font-size: var(--font-size-lg);
+  color: white; /* White text for better contrast */
+  font-size: var(--font-size-xl); /* Increased font size for emphasis */
   white-space: nowrap; /* Prevent text from wrapping */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Add text shadow for better readability */
 }
 
 .metric-label {
   font-size: var(--font-size-lg); /* Increased font size for emojis */
-  color: var(--color-dark);
+  color: white; /* White text for better contrast */
   opacity: 0.9; /* Increased opacity for better visibility */
   margin-top: var(--space-xs);
   font-weight: 600;
@@ -1303,9 +1308,13 @@ body.dark-mode::before {
 }
 
 body.dark-mode section,
-body.dark-mode .model-card,
 body.dark-mode .modal-content {
   background-color: rgba(44, 42, 41, 0.95); /* Black C with transparency */
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .model-card {
+  background-color: #1a2e4c !important; /* Keep the blue background in dark mode too */
   border-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -1501,14 +1510,13 @@ body.dark-mode footer::before {
 /* Enhanced Recommendation Card Special Styling */
 .recommendation-card {
   position: relative;
-  border: 2px solid transparent;
-  background-image: linear-gradient(white, white), var(--gradient-primary);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  /* Border is now applied to all model cards */
+  background-color: #1a2e4c; /* Same blue background as regular cards */
 }
 
 body.dark-mode .recommendation-card {
-  background-image: linear-gradient(var(--card-bg-dark), var(--card-bg-dark)), var(--gradient-primary);
+  background-color: #1a2e4c !important; /* Keep blue background in dark mode */
+  /* Border is now applied to all model cards */
 }
 
 .recommendation-card::before {
